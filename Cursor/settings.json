@@ -1,0 +1,191 @@
+{
+    "cSpell.enabled": true,
+    "cSpell.enabledLanguageIds": [
+        "markdown"
+    ],
+    "workbench.iconTheme": "vscode-icons",
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook",
+        "*.wav": "default",
+        "*.png": "imagePreview.previewEditor",
+        "*.jpg": "imagePreview.previewEditor",
+        "*.JPEG": "imagePreview.previewEditor"
+    },
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "remote.SSH.remotePlatform": {
+        "titan4.ii.pw.edu.pl": "linux",
+        "athena.cyfronet.pl": "linux",
+        "sprint1": "linux",
+        "athena": "linux",
+        "helios": "linux",
+        "h84": "linux",
+        "h85": "linux",
+        "h82": "linux"
+    },
+    "notebook.formatOnSave.enabled": true,
+    "notebook.codeActionsOnSave": {
+        "notebook.source.fixAll": "explicit",
+        "notebook.source.organizeImports": "explicit"
+    },
+    "notebook.formatOnCellExecution": true,
+    "notebook.output.scrolling": true,
+    "notebook.output.wordWrap": true,
+    "notebook.stickyScroll.enabled": true,
+    "notebook.lineNumbers": "on",
+    "notebook.diff.overviewRuler": true,
+    "diffEditor.experimental.showMoves": true,
+    "diffEditor.hideUnchangedRegions.enabled": true,
+    "notebook.scrolling.revealNextCellOnExecute": "fullCell",
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "editor.formatOnPaste": true,
+    "autoDocstring.docstringFormat": "sphinx",
+    "workbench.colorTheme": "One Dark Pro Mix",
+    "editor.fontSize": 16,
+    "terminal.integrated.fontSize": 15,
+    "markdown.preview.fontSize": 16,
+    "debug.console.fontSize": 16,
+    "window.zoomLevel": 0,
+    "gitlens.views.branches.branches.layout": "list",
+    "vsicons.dontShowNewVersionMessage": true,
+    "terminal.integrated.stickyScroll.enabled": true,
+    "editor.stickyScroll.enabled": true,
+    "multiDiffEditor.experimental.enabled": true,
+    "git.confirmSync": false,
+    "editor.cursorBlinking": "solid",
+    "editor.cursorStyle": "line",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.cursorSurroundingLines": 15,
+    "editor.inlineSuggest.enabled": true,
+    "editor.minimap.enabled": false,
+    "editor.minimap.renderCharacters": false,
+    "editor.smoothScrolling": true,
+    "terminal.integrated.smoothScrolling": true,
+    "editor.tabCompletion": "on",
+    "editor.wordWrap": "on",
+    "explorer.autoReveal": false,
+    "explorer.confirmDragAndDrop": false,
+    "files.autoSave": "onFocusChange",
+    "files.defaultLanguage": "python",
+    "files.insertFinalNewline": true,
+    "files.simpleDialog.enable": true,
+    "gitlens.codeLens.enabled": false,
+    "gitlens.currentLine.enabled": false,
+    "gitlens.hovers.currentLine.over": "line",
+    "jupyter.askForKernelRestart": false,
+    "jupyter.debugJustMyCode": false,
+    "workbench.tree.indent": 20,
+    "jupyter.interactiveWindow.creationMode": "perFile",
+    "jupyter.interactiveWindow.textEditor.executeSelection": true,
+    "jupyter.runStartupCommands": [
+        "%load_ext autoreload",
+        "%autoreload 2"
+    ],
+    "output.smartScroll.enabled": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "terminal.integrated.shellIntegration.enabled": true,
+    "window.commandCenter": true,
+    "workbench.editor.enablePreview": true,
+    "workbench.editor.wrapTabs": false,
+    "projectManager.git.baseFolders": [
+        "/home/bartosz/code"
+    ],
+    "remote.extensionKind": {
+        "alefragnani.project-manager": [
+            "workspace"
+        ],
+        "GitHub.copilot": [
+            "ui"
+        ]
+    },
+    "mypy-type-checker.severity": {
+        "error": "Error",
+        "note": "Information"
+    },
+    "mypy.runUsingActiveInterpreter": true,
+    "workbench.colorCustomizations": {},
+    "terminal.integrated.inheritEnv": false,
+    "mypy-type-checker.args": [
+        "--config-file=mypy.ini"
+    ],
+    "github.copilot.editor.enableAutoCompletions": true,
+    "github.copilot.preferredAccount": "cywinski",
+    "accessibility.signals.voiceRecordingStarted": {
+        "sound": "auto"
+    },
+    "interactiveWindow.executeWithShiftEnter": true,
+    "security.promptForRemoteFileProtocolHandling": false,
+    "remote.SSH.serverInstallPath": {
+        "athena.cyfronet.pl": "/net/tscratch/people/plgbcywinski/vscode-server",
+        "helios": "/net/scratch/hscra/plgrid/plgbcywinski/"
+    },
+    "remote.SSH.useExecServer": false,
+    "jupyter.widgetScriptSources": [
+        "jsdelivr.com",
+        "unpkg.com"
+    ],
+    "workbench.editorLargeFileConfirmation": 50,
+    "editor.formatOnSaveMode": "modifications",
+    "cursor.cpp.disabledLanguages": [
+        "plaintext",
+        "markdown",
+        "scminput"
+    ],
+    "cursor.cpp.enablePartialAccepts": true,
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+        },
+        "zsh": {
+            "path": "zsh"
+        },
+        "fish": {
+            "path": "fish"
+        },
+        "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+        },
+        "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+        },
+        "tmux-shell": {
+            "path": "tmux",
+            "args": [
+                "new-session",
+                "-A",
+                "-s",
+                "vscode:${workspaceFolder}"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "tmux-shell",
+    "cSpell.userWords": [
+        "autocast",
+        "bcywinski",
+        "checkpointing",
+        "dataroot",
+        "ddim",
+        "DDPM",
+        "pretrained",
+        "sokoban",
+        "subgoal",
+        "timestep",
+        "timesteps",
+        "unet",
+        "xformers",
+        "xstart"
+    ]
+}
