@@ -98,6 +98,22 @@ log_info "Linking SSH directory to /root..."
 rm -rf /root/.ssh
 ln -s /workspace/.ssh /root/.ssh
 
+# Bunch of GPT output to fix key
+mkdir -p /workspace/ssh_keys
+chmod 700 /workspace/ssh_keys
+mv /workspace/.ssh/* /workspace/ssh_keys/
+chmod 600 /workspace/ssh_keys/id_ed25519
+chmod 644 /workspace/ssh_keys/id_ed25519.pub
+chmod 600 /workspace/ssh_keys/config
+rm -rf /root/.ssh
+mkdir -p /root/.ssh
+cp -r /workspace/ssh_keys/* /root/.ssh/
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/id_ed25519
+chmod 644 /root/.ssh/id_ed25519.pub
+chmod 600 /root/.ssh/config
+
+
 # Display SSH public key
 echo ""
 log_success "SSH public key (add this to GitHub):"
