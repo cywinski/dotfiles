@@ -1,0 +1,18 @@
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+
+# Add your custom hosts here as needed
+# Example:
+# Host myserver
+#     HostName myserver.example.com
+#     User myusername
+#     IdentityFile ~/.ssh/id_ed25519
