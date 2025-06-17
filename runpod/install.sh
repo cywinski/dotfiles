@@ -1,87 +1,30 @@
 #!/bin/bash
 
 # RunPod Bootstrap Installer
-# This script can be run directly from GitHub to bootstrap your RunPod setup
-#
-# Usage:
-# curl -fsSL https://raw.githubusercontent.com/yourusername/dotfiles/main/runpod/install.sh | bash
+# Simple one-liner bootstrap for the minimal setup
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-echo -e "${BLUE}🚀 RunPod Bootstrap Installer${NC}"
-echo "This script will download your dotfiles and start the setup process."
-echo ""
-
-# Default values
-DOTFILES_REPO="https://github.com/yourusername/dotfiles.git"
-BRANCH="main"
+# Default dotfiles repo (update this to your actual repo)
+DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/cywinski/dotfiles.git}"
 INSTALL_DIR="/tmp/dotfiles-setup"
 
-# Parse command line arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --repo)
-            DOTFILES_REPO="$2"
-            shift 2
-            ;;
-        --branch)
-            BRANCH="$2"
-            shift 2
-            ;;
-        --help)
-            cat << EOF
-RunPod Bootstrap Installer
-
-Usage: $0 [OPTIONS]
-
-Options:
-  --repo    GitHub repository URL for dotfiles (default: https://github.com/yourusername/dotfiles.git)
-  --branch  Branch to checkout (default: main)
-  --help    Show this help message
-
-Example:
-  $0 --repo https://github.com/myuser/dotfiles.git --branch develop
-
-EOF
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Unknown option: $1${NC}"
-            exit 1
-            ;;
-    esac
-done
+echo "🚀 RunPod Minimal Setup Bootstrap"
+echo "Downloading dotfiles from: $DOTFILES_REPO"
 
 # Install git if not present
 if ! command -v git >/dev/null 2>&1; then
-    echo -e "${YELLOW}Installing git...${NC}"
+    echo "Installing git..."
     apt-get update -y
     apt-get install -y git
 fi
 
-# Clone dotfiles repository
-echo -e "${BLUE}Cloning dotfiles repository...${NC}"
+# Clone and run setup
 if [[ -d "$INSTALL_DIR" ]]; then
     rm -rf "$INSTALL_DIR"
 fi
 
-git clone -b "$BRANCH" "$DOTFILES_REPO" "$INSTALL_DIR"
-
-# Make scripts executable
-chmod +x "$INSTALL_DIR/runpod/setup.sh"
-chmod +x "$INSTALL_DIR/runpod/quick-setup.sh"
-
-# Run the quick setup
-echo -e "${GREEN}Repository cloned successfully!${NC}"
-echo -e "${BLUE}Starting RunPod setup...${NC}"
-echo ""
-
+git clone "$DOTFILES_REPO" "$INSTALL_DIR"
 cd "$INSTALL_DIR/runpod"
-exec ./quick-setup.sh
+chmod +x *.sh
+exec ./setup.sh
