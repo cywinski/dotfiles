@@ -34,62 +34,17 @@ cd /workspace
 
 # Create essential directories
 log_info "Creating essential directories..."
-mkdir -p /workspace/bin
-mkdir -p /workspace/tools
 mkdir -p /workspace/config
 
-# Add workspace bin to PATH if not already there
-if ! grep -q "/workspace/bin" /root/.bashrc; then
-    log_info "Adding /workspace/bin to PATH..."
-    echo 'export PATH="/workspace/bin:$PATH"' >> /root/.bashrc
-fi
+# Install tmux and fish using apt
+log_info "Installing tmux and fish using apt..."
+apt update
+apt install -y tmux fish
 
-# Install tmux from source for persistence
-if [[ ! -f /workspace/bin/tmux ]]; then
-    log_info "Installing tmux to /workspace..."
-    cd /workspace/tools
+# Create fish config directory
+mkdir -p /workspace/config/fish
 
-    # Download and compile tmux
-    wget https://github.com/tmux/tmux/releases/download/3.4/tmux-3.4.tar.gz
-    tar -xzf tmux-3.4.tar.gz
-    cd tmux-3.4
-
-    # Install dependencies for building tmux
-    apt-get update -y
-    apt-get install -y libevent-dev ncurses-dev build-essential bison pkg-config
-
-    # Configure and install to /workspace
-    ./configure --prefix=/workspace
-    make && make install
-
-    # Cleanup
-    cd /workspace/tools
-    rm -rf tmux-3.4*
-
-    log_success "tmux installed to /workspace/bin/tmux"
-else
-    log_info "tmux already installed in /workspace"
-fi
-
-# Install fish shell to /workspace
-if [[ ! -f /workspace/bin/fish ]]; then
-    log_info "Installing fish shell to /workspace..."
-    cd /workspace/tools
-
-    # Download fish
-    wget https://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_12/amd64/fish_3.7.1-1_amd64.deb
-    dpkg -i fish_3.7.1-1_amd64.deb || apt-get install -f -y
-
-    # Copy fish to workspace
-    cp /usr/bin/fish /workspace/bin/fish
-
-    # Create fish config directory
-    mkdir -p /workspace/config/fish
-
-    log_success "fish installed to /workspace/bin/fish"
-else
-    log_info "fish already installed in /workspace"
-fi
+log_success "tmux and fish installed via apt"
 
 
 
@@ -116,13 +71,13 @@ fi
 
 # Set fish as default shell
 log_info "Setting fish as default shell..."
-chsh -s /workspace/bin/fish root
+chsh -s /usr/bin/fish root
 
 # Create useful aliases and functions
 log_info "Creating workspace-aware aliases..."
 cat >> /workspace/config/workspace_aliases.sh << 'EOF'
 # Workspace-aware aliases
-alias tm='/workspace/bin/tmux'
+alias tm='tmux'
 
 # Quick navigation
 alias ws='cd /workspace'
@@ -152,7 +107,7 @@ mkdir -p /workspace/projects
 cat > /workspace/config/welcome.sh << 'EOF'
 #!/bin/bash
 echo "🚀 Welcome to your persistent RunPod workspace!"
-echo "📁 Essential tools installed in /workspace/bin:"
+echo "📁 Essential tools installed via apt:"
 echo "   • tmux, fish (default shell)"
 echo "📂 Your projects should go in /workspace/projects"
 echo "⚙️  Configuration files in /workspace/config"
@@ -175,16 +130,14 @@ echo ""
 log_success "First-time workspace setup completed!"
 echo ""
 echo -e "${YELLOW}✨ Your persistent workspace is ready!${NC}"
-echo -e "${BLUE}Essential tools installed:${NC}"
-echo "  • tmux (/workspace/bin/tmux)"
-echo "  • fish (/workspace/bin/fish) - set as default shell"
+echo -e "${BLUE}Essential tools installed via apt:${NC}"
+echo "  • tmux (/usr/bin/tmux)"
+echo "  • fish (/usr/bin/fish) - set as default shell"
 echo ""
 echo -e "${GREEN}💡 Start a new shell session:${NC}"
 echo "exec fish"
 echo ""
 echo -e "${BLUE}📁 Directory structure:${NC}"
 echo "/workspace/"
-echo "├── bin/          # Your persistent tools"
 echo "├── config/       # Configuration files"
-echo "├── projects/     # Your development projects"
-echo "└── tools/        # Build artifacts"
+echo "└── projects/     # Your development projects"
