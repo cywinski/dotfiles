@@ -29,8 +29,9 @@ cd dotfiles/runpod
 - Essential packages (curl, wget, git, build tools)
 - Python development tools
 - **uv** package manager
+- **tmux** and **fish** (installed fresh each restart)
 
-### ✅ Environment Variables
+### ✅ Environment Variables (set each restart)
 - `HF_HOME=/workspace/hf` (HuggingFace cache in persistent storage)
 - `HF_HUB_ENABLE_HF_TRANSFER=1` (faster HF transfers)
 - `PATH` updated for uv
@@ -43,6 +44,11 @@ cd dotfiles/runpod
   - `npm_config_cache=/workspace/.npm`
   - `PIP_CACHE_DIR=/workspace/.pip-cache`
   - `UV_CACHE_DIR=/workspace/.uv-cache`
+
+### ✅ Configuration Linking (set each restart)
+- Symlinks `/root/.tmux.conf` → `/workspace/config/.tmux.conf`
+- Symlinks `/root/.config/fish/config.fish` → `/workspace/config/fish/config.fish`
+- Sources workspace aliases and welcome script in `/root/.bashrc`
 
 ### ✅ SSH & GitHub
 - SSH key generation (ed25519)
@@ -65,10 +71,10 @@ For your first RunPod setup, also run the workspace installer to get persistent 
 ./first_time_setup.sh
 ```
 
-This installs to `/workspace` (persistent):
-- **tmux** - Terminal multiplexer
-- **fish** - Modern shell with auto-completion (set as default)
-- Configuration files and aliases
+This sets up persistent files in `/workspace` (one-time only):
+- **tmux** and **fish** configuration files
+- Workspace aliases and welcome script
+- Project directories
 
 ## Modular Scripts
 
@@ -97,7 +103,7 @@ export GITHUB_EMAIL="your_email@example.com"
 ## Post-Setup Workflow
 
 1. **Add SSH key to GitHub** (displayed after setup)
-2. **First-time only**: Install persistent tools to `/workspace`:
+2. **First-time only**: Set up persistent configuration:
    ```bash
    ./first_time_setup.sh
    ```

@@ -26,7 +26,7 @@ log_warning() {
 }
 
 echo -e "${BLUE}🚀 RunPod First-Time Workspace Setup${NC}"
-echo "Installing essential tools under /workspace for persistence..."
+echo "Setting up persistent configuration files and directories..."
 echo ""
 
 # Ensure we're working in /workspace
@@ -36,15 +36,8 @@ cd /workspace
 log_info "Creating essential directories..."
 mkdir -p /workspace/config
 
-# Install tmux and fish using apt
-log_info "Installing tmux and fish using apt..."
-apt update
-apt install -y tmux fish
-
 # Create fish config directory
 mkdir -p /workspace/config/fish
-
-log_success "tmux and fish installed via apt"
 
 
 
@@ -55,8 +48,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -f "$SCRIPT_DIR/tmux.conf" ]]; then
     log_info "Copying tmux configuration..."
     cp "$SCRIPT_DIR/tmux.conf" /workspace/config/.tmux.conf
-    # Create symlink in home directory pointing to workspace config
-    ln -sf /workspace/config/.tmux.conf /root/.tmux.conf
 fi
 
 # Copy fish config
@@ -64,14 +55,9 @@ if [[ -f "$SCRIPT_DIR/fish_config.fish" ]]; then
     log_info "Copying fish configuration..."
     mkdir -p /workspace/config/fish
     cp "$SCRIPT_DIR/fish_config.fish" /workspace/config/fish/config.fish
-    # Create symlink in home directory pointing to workspace config
-    mkdir -p /root/.config/fish
-    ln -sf /workspace/config/fish/config.fish /root/.config/fish/config.fish
 fi
 
-# Set fish as default shell
-log_info "Setting fish as default shell..."
-chsh -s /usr/bin/fish root
+
 
 # Create useful aliases and functions
 log_info "Creating workspace-aware aliases..."
@@ -95,11 +81,6 @@ alias py='python'
 alias pip='uv pip'
 EOF
 
-# Source workspace aliases in bashrc
-if ! grep -q "workspace_aliases.sh" /root/.bashrc; then
-    echo "source /workspace/config/workspace_aliases.sh" >> /root/.bashrc
-fi
-
 # Create projects directory
 mkdir -p /workspace/projects
 
@@ -107,8 +88,7 @@ mkdir -p /workspace/projects
 cat > /workspace/config/welcome.sh << 'EOF'
 #!/bin/bash
 echo "🚀 Welcome to your persistent RunPod workspace!"
-echo "📁 Essential tools installed via apt:"
-echo "   • tmux, fish (default shell)"
+echo "📁 tmux and fish are installed fresh each pod restart"
 echo "📂 Your projects should go in /workspace/projects"
 echo "⚙️  Configuration files in /workspace/config"
 echo ""
@@ -121,21 +101,20 @@ EOF
 
 chmod +x /workspace/config/welcome.sh
 
-# Add welcome to bashrc
-if ! grep -q "welcome.sh" /root/.bashrc; then
-    echo "/workspace/config/welcome.sh" >> /root/.bashrc
-fi
-
 echo ""
 log_success "First-time workspace setup completed!"
 echo ""
 echo -e "${YELLOW}✨ Your persistent workspace is ready!${NC}"
-echo -e "${BLUE}Essential tools installed via apt:${NC}"
-echo "  • tmux (/usr/bin/tmux)"
-echo "  • fish (/usr/bin/fish) - set as default shell"
+echo -e "${BLUE}Configuration setup complete:${NC}"
+echo "  • tmux config copied to /workspace/config"
+echo "  • fish config copied to /workspace/config"
+echo "  • workspace aliases and welcome script created"
 echo ""
-echo -e "${GREEN}💡 Start a new shell session:${NC}"
-echo "exec fish"
+echo -e "${GREEN}💡 Run the main setup to install tmux/fish:${NC}"
+echo "./setup.sh"
+echo ""
+echo -e "${GREEN}Then start fish shell:${NC}"
+echo "fish"
 echo ""
 echo -e "${BLUE}📁 Directory structure:${NC}"
 echo "/workspace/"

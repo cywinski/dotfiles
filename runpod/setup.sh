@@ -57,6 +57,45 @@ log_info "Stage 2: Setting up environment variables..."
 log_info "Stage 3: Setting up SSH keys and GitHub..."
 "$SCRIPT_DIR/setup_github.sh" "$GITHUB_USERNAME" "$GITHUB_EMAIL" "$SSH_KEY_TYPE"
 
+# Stage 4: Install essential development tools
+log_info "Stage 4: Installing essential development tools..."
+apt update
+apt install -y tmux fish
+
+# Set fish as default shell if not already set
+if [[ "$(getent passwd root | cut -d: -f7)" != "/usr/bin/fish" ]]; then
+    log_info "Setting fish as default shell..."
+    chsh -s /usr/bin/fish root
+fi
+
+# Create symlinks to persistent configs if they exist
+if [[ -f /workspace/config/.tmux.conf ]]; then
+    log_info "Linking tmux configuration..."
+    ln -sf /workspace/config/.tmux.conf /root/.tmux.conf
+fi
+
+if [[ -f /workspace/config/fish/config.fish ]]; then
+    log_info "Linking fish configuration..."
+    mkdir -p /root/.config/fish
+    ln -sf /workspace/config/fish/config.fish /root/.config/fish/config.fish
+fi
+
+# Source workspace aliases if they exist
+if [[ -f /workspace/config/workspace_aliases.sh ]]; then
+    if ! grep -q "workspace_aliases.sh" /root/.bashrc; then
+        log_info "Adding workspace aliases to bashrc..."
+        echo "source /workspace/config/workspace_aliases.sh" >> /root/.bashrc
+    fi
+fi
+
+# Add welcome script if it exists
+if [[ -f /workspace/config/welcome.sh ]]; then
+    if ! grep -q "welcome.sh" /root/.bashrc; then
+        log_info "Adding welcome script to bashrc..."
+        echo "/workspace/config/welcome.sh" >> /root/.bashrc
+    fi
+fi
+
 log_success "RunPod minimal setup completed!"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
