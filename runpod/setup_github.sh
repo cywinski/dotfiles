@@ -46,7 +46,7 @@ mkdir -p /workspace/.ssh
 chmod 700 /workspace/.ssh
 
 # Generate SSH key if it doesn't exist in persistent storage
-SSH_KEY_PATH="/workspace/.ssh/id_$SSH_KEY_TYPE"
+SSH_KEY_PATH="/root/.ssh/id_$SSH_KEY_TYPE"
 if [[ ! -f "$SSH_KEY_PATH" ]]; then
     log_info "Generating SSH key ($SSH_KEY_TYPE)..."
     ssh-keygen -t "$SSH_KEY_TYPE" -f "$SSH_KEY_PATH" -N "" -C "$GITHUB_EMAIL"
