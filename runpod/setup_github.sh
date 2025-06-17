@@ -33,20 +33,15 @@ GITHUB_USERNAME="$1"
 GITHUB_EMAIL="$2"
 SSH_KEY_TYPE="$3"
 
-# Set up SSH directory and link to persistent storage
+# Set up SSH directories
 log_info "Setting up SSH directory..."
 mkdir -p /workspace/.ssh
 chmod 700 /workspace/.ssh
 chown root:root /workspace/.ssh
 
-# Create symlink from /root/.ssh to /workspace/.ssh
-if [[ ! -L /root/.ssh ]]; then
-    # Remove /root/.ssh if it exists as a directory
-    if [[ -d /root/.ssh && ! -L /root/.ssh ]]; then
-        rm -rf /root/.ssh
-    fi
-    ln -sf /workspace/.ssh /root/.ssh
-fi
+mkdir -p /root/.ssh
+chmod 700 /root/.ssh
+chown root:root /root/.ssh
 
 # Generate SSH key if it doesn't exist in persistent storage
 SSH_KEY_PATH="/workspace/.ssh/id_$SSH_KEY_TYPE"
@@ -78,19 +73,29 @@ git config --global user.name "$GITHUB_USERNAME"
 git config --global user.email "$GITHUB_EMAIL"
 git config --global init.defaultBranch main
 
-# Copy SSH config if it exists and not already there
+# Copy SSH config to both locations
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "$SCRIPT_DIR/ssh_config" && ! -f /workspace/.ssh/config ]]; then
-    log_info "Copying SSH configuration..."
-    cp "$SCRIPT_DIR/ssh_config" /workspace/.ssh/config
-    chmod 600 /workspace/.ssh/config
-    chown root:root /workspace/.ssh/config
+if [[ -f "$SCRIPT_DIR/ssh_config" ]]; then
+    # Copy to persistent storage if not exists
+    if [[ ! -f /workspace/.ssh/config ]]; then
+        log_info "Copying SSH configuration to persistent storage..."
+        cp "$SCRIPT_DIR/ssh_config" /workspace/.ssh/config
+        chmod 600 /workspace/.ssh/config
+        chown root:root /workspace/.ssh/config
+    fi
+
+    # Always copy to /root/.ssh for SSH to use
+    log_info "Setting up SSH configuration..."
+    cp /workspace/.ssh/config /root/.ssh/config
+    chmod 600 /root/.ssh/config
+    chown root:root /root/.ssh/config
 fi
 
-# Ensure SSH config permissions are correct (in case it was corrupted)
-if [[ -f /workspace/.ssh/config ]]; then
-    chmod 600 /workspace/.ssh/config
-    chown root:root /workspace/.ssh/config
+# Create symlinks for SSH keys (these are the large files we want to persist)
+if [[ -f "/workspace/.ssh/id_$SSH_KEY_TYPE" ]]; then
+    log_info "Linking SSH keys..."
+    ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE" "/root/.ssh/id_$SSH_KEY_TYPE"
+    ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE.pub" "/root/.ssh/id_$SSH_KEY_TYPE.pub"
 fi
 
 # Display SSH public key

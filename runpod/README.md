@@ -54,9 +54,9 @@ cd dotfiles/runpod
 
 ### ✅ SSH & GitHub (first-time setup, then preserved)
 - SSH keys stored in `/workspace/.ssh` (persistent)
+- SSH keys symlinked to `/root/.ssh` for SSH access
+- SSH config copied to `/root/.ssh/config` each restart
 - Git configuration (username, email)
-- SSH config for GitHub
-- Symlink `/root/.ssh` → `/workspace/.ssh`
 
 ## What's NOT Included (Since /workspace is Persistent)
 
