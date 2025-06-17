@@ -13,7 +13,7 @@ alias fgrep 'fgrep --color=auto'
 alias egrep 'egrep --color=auto'
 
 # Navigation aliases
-alias code 'cd /workspace/code'
+alias projects 'cd /workspace/projects'
 alias ws 'cd /workspace'
 
 # Git aliases
@@ -70,6 +70,7 @@ end
 echo "🚀 RunPod environment ready!"
 echo "💡 Use 'jlab' to start Jupyter Lab"
 echo "📁 Current directory: "(pwd)
+echo "🐟 Fish config loaded with aliases"
 
 # Auto-start tmux if not already in tmux and SSH session
 if status is-interactive

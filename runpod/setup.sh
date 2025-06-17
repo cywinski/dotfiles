@@ -91,7 +91,7 @@ alias tm='tmux'
 
 # Quick navigation
 alias ws='cd /workspace'
-alias code='cd /workspace/code'
+alias projects='cd /workspace/projects'
 
 # Git aliases for workspace
 alias gs='git status'
@@ -106,8 +106,8 @@ alias pip='uv pip'
 EOF
 fi
 
-# Create code directory
-mkdir -p /workspace/code
+# Create projects directory
+mkdir -p /workspace/projects
 
 # Create symlinks to persistent configs
 if [[ -f /workspace/config/.tmux.conf ]]; then
@@ -166,3 +166,9 @@ echo ""
 echo -e "${YELLOW}To use fish shell with aliases:${NC}"
 echo "1. Start fish: fish"
 echo "2. Or reload current fish config: source ~/.config/fish/config.fish"
+echo "3. For tmux: tmux kill-server && tmux (to restart tmux with fish)"
+echo ""
+echo -e "${YELLOW}Troubleshooting fish aliases in tmux:${NC}"
+echo "- Check config exists: ls -la ~/.config/fish/config.fish"
+echo "- Test alias manually in fish: fish -c 'projects'"
+echo "- Restart tmux server: tmux kill-server && tmux"
