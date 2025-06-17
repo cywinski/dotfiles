@@ -91,7 +91,7 @@ alias tm='tmux'
 
 # Quick navigation
 alias ws='cd /workspace'
-alias projects='cd /workspace/projects'
+alias code='cd /workspace/code'
 
 # Git aliases for workspace
 alias gs='git status'
@@ -106,8 +106,8 @@ alias pip='uv pip'
 EOF
 fi
 
-# Create projects directory
-mkdir -p /workspace/projects
+# Create code directory
+mkdir -p /workspace/code
 
 # Create symlinks to persistent configs
 if [[ -f /workspace/config/.tmux.conf ]]; then

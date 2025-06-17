@@ -78,7 +78,7 @@ export GITHUB_EMAIL="your_email@example.com"
 
 ## What's NOT Included (Since /workspace is Persistent)
 
-- ❌ Virtual environments (create these in `/workspace/projects`)
+- ❌ Virtual environments (create these in `/workspace/code`)
 - ❌ Cursor IDE installation
 - ❌ Project-specific dependencies
 - ❌ Repository cloning
@@ -111,7 +111,7 @@ export GITHUB_EMAIL="your_email@example.com"
 1. **First-time only**: Add SSH key to GitHub (displayed after first setup)
 2. **Clone your projects to `/workspace`**:
    ```bash
-   cd /workspace/projects
+   cd /workspace/code
    git clone git@github.com:cywinski/yourproject.git
    cd yourproject
    ```
@@ -160,7 +160,7 @@ bash
    git clone https://github.com/cywinski/dotfiles.git /tmp/dotfiles && cd /tmp/dotfiles/runpod && ./setup.sh
    ```
 3. **First-time only**: Add SSH key to GitHub (displayed after setup)
-4. Clone projects: `cd /workspace/projects && git clone ...`
+4. Clone projects: `cd /workspace/code && git clone ...`
 5. Work normally - everything persists in `/workspace`
 
 **Subsequent restarts**: Just run step 2 again - SSH keys and configs persist!

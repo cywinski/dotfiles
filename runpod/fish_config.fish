@@ -12,6 +12,10 @@ alias grep 'grep --color=auto'
 alias fgrep 'fgrep --color=auto'
 alias egrep 'egrep --color=auto'
 
+# Navigation aliases
+alias code 'cd /workspace/code'
+alias ws 'cd /workspace'
+
 # Git aliases
 alias gs 'git status'
 alias ga 'git add'
