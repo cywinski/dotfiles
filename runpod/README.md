@@ -50,10 +50,11 @@ cd dotfiles/runpod
 - Symlinks `/root/.config/fish/config.fish` → `/workspace/config/fish/config.fish`
 - Sources workspace aliases and welcome script in `/root/.bashrc`
 
-### ✅ SSH & GitHub
-- SSH key generation (ed25519)
+### ✅ SSH & GitHub (first-time setup, then preserved)
+- SSH keys stored in `/workspace/.ssh` (persistent)
 - Git configuration (username, email)
 - SSH config for GitHub
+- Symlink `/root/.ssh` → `/workspace/.ssh`
 
 ## What's NOT Included (Since /workspace is Persistent)
 
@@ -102,7 +103,7 @@ export GITHUB_EMAIL="your_email@example.com"
 
 ## Post-Setup Workflow
 
-1. **Add SSH key to GitHub** (displayed after setup)
+1. **First-time only**: Add SSH key to GitHub (displayed after first setup)
 2. **First-time only**: Set up persistent configuration:
    ```bash
    ./first_time_setup.sh

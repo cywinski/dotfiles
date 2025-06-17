@@ -7,7 +7,7 @@ Host *
 Host github.com
     HostName github.com
     User git
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile /workspace/.ssh/id_ed25519
     IdentitiesOnly yes
 
 # Add your custom hosts here as needed

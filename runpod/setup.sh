@@ -98,10 +98,14 @@ fi
 
 log_success "RunPod minimal setup completed!"
 echo ""
-echo -e "${YELLOW}Next steps:${NC}"
-echo "1. Add your SSH public key to GitHub (displayed above)"
-echo "2. Test SSH: ssh -T git@github.com"
-echo "3. Your /workspace directory is preserved between pod restarts"
-echo "4. Clone your repositories to /workspace for persistence"
+if [[ -f /workspace/.ssh/id_ed25519.pub ]]; then
+    echo -e "${GREEN}SSH key ready! (persistent across restarts)${NC}"
+    echo "Test connection: ssh -T git@github.com"
+else
+    echo -e "${YELLOW}Next steps:${NC}"
+    echo "1. Add your SSH public key to GitHub (displayed above)"
+    echo "2. Test SSH: ssh -T git@github.com"
+fi
 echo ""
+echo -e "${BLUE}Your /workspace directory is preserved between pod restarts${NC}"
 echo -e "${GREEN}Environment is ready!${NC}"
