@@ -57,8 +57,9 @@ else
     log_info "SSH key already exists in persistent storage"
 fi
 
-# Ensure SSH key permissions are correct (in case they were corrupted)
+# Always ensure SSH key permissions are correct (RunPod may reset them)
 if [[ -f "$SSH_KEY_PATH" ]]; then
+    log_info "Setting SSH key permissions..."
     chmod 600 "$SSH_KEY_PATH"
     chown root:root "$SSH_KEY_PATH"
 fi
@@ -66,6 +67,10 @@ if [[ -f "${SSH_KEY_PATH}.pub" ]]; then
     chmod 644 "${SSH_KEY_PATH}.pub"
     chown root:root "${SSH_KEY_PATH}.pub"
 fi
+
+# Ensure workspace .ssh directory has correct permissions
+chmod 700 /workspace/.ssh
+chown root:root /workspace/.ssh
 
 # Set up Git configuration
 log_info "Configuring Git..."
@@ -94,8 +99,17 @@ fi
 # Create symlinks for SSH keys (these are the large files we want to persist)
 if [[ -f "/workspace/.ssh/id_$SSH_KEY_TYPE" ]]; then
     log_info "Linking SSH keys..."
+    # Remove existing files/links first
+    rm -f "/root/.ssh/id_$SSH_KEY_TYPE"
+    rm -f "/root/.ssh/id_$SSH_KEY_TYPE.pub"
+    # Create fresh symlinks
     ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE" "/root/.ssh/id_$SSH_KEY_TYPE"
     ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE.pub" "/root/.ssh/id_$SSH_KEY_TYPE.pub"
+
+    # Verify the source files have correct permissions before linking
+    chmod 600 "/workspace/.ssh/id_$SSH_KEY_TYPE"
+    chmod 644 "/workspace/.ssh/id_$SSH_KEY_TYPE.pub"
+    chown root:root "/workspace/.ssh/id_$SSH_KEY_TYPE" "/workspace/.ssh/id_$SSH_KEY_TYPE.pub"
 fi
 
 # Display SSH public key
