@@ -11,6 +11,11 @@ Inspired by [cadentj/dotfiles](https://github.com/cadentj/dotfiles/tree/main).
 curl -fsSL https://raw.githubusercontent.com/cywinski/dotfiles/main/runpod/install.sh | bash
 ```
 
+### Alternative one-liner (if raw URL fails):
+```bash
+git clone https://github.com/cywinski/dotfiles.git /tmp/dotfiles && cd /tmp/dotfiles/runpod && ./setup.sh
+```
+
 ### Manual setup:
 ```bash
 git clone https://github.com/cywinski/dotfiles.git
