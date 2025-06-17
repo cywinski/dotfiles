@@ -4,24 +4,42 @@ Minimal configuration scripts for RunPod that only set up **non-persistent, pod-
 
 Inspired by [cadentj/dotfiles](https://github.com/cadentj/dotfiles/tree/main).
 
-## Quick Start
+## Setup Instructions
 
-### One-liner (easiest):
-```bash
-curl -fsSL https://raw.githubusercontent.com/cywinski/dotfiles/main/runpod/install.sh | bash
-```
-
-### Alternative one-liner (if raw URL fails):
+### Quick Start (One-liner):
 ```bash
 git clone https://github.com/cywinski/dotfiles.git /tmp/dotfiles && cd /tmp/dotfiles/runpod && ./setup.sh
 ```
 
-**That's it!** No separate first-time setup needed.
-
-### Manual setup:
+### Manual Setup:
 ```bash
 git clone https://github.com/cywinski/dotfiles.git
 cd dotfiles/runpod
+./setup.sh
+```
+
+### For Other Users:
+
+1. **Fork or copy this repository** to your own GitHub account
+2. **Update the configuration** in `setup.sh`:
+   ```bash
+   # Edit these lines in setup.sh
+   GITHUB_USERNAME="${GITHUB_USERNAME:-YOUR_USERNAME}"
+   GITHUB_EMAIL="${GITHUB_EMAIL:-your_email@example.com}"
+   ```
+3. **Clone and run your version**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/dotfiles.git
+   cd dotfiles/runpod
+   ./setup.sh
+   ```
+
+### Alternative: Override with Environment Variables
+```bash
+git clone https://github.com/cywinski/dotfiles.git
+cd dotfiles/runpod
+export GITHUB_USERNAME="your_username"
+export GITHUB_EMAIL="your_email@example.com"
 ./setup.sh
 ```
 
@@ -137,8 +155,11 @@ bash
 ## Example Workflow
 
 1. Start new RunPod
-2. Run setup: `curl -fsSL https://raw.githubusercontent.com/cywinski/dotfiles/main/runpod/install.sh | bash`
-3. **First-time only**: Add SSH key to GitHub
+2. Run setup (one-liner):
+   ```bash
+   git clone https://github.com/cywinski/dotfiles.git /tmp/dotfiles && cd /tmp/dotfiles/runpod && ./setup.sh
+   ```
+3. **First-time only**: Add SSH key to GitHub (displayed after setup)
 4. Clone projects: `cd /workspace/projects && git clone ...`
 5. Work normally - everything persists in `/workspace`
 

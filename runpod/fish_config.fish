@@ -24,6 +24,7 @@ alias gd 'git diff'
 alias py 'python'
 alias pip 'uv pip'
 alias venv 'uv venv'
+alias activate 'source .venv/bin/activate.fish'
 
 # Tmux aliases
 alias tm 'tmux'
