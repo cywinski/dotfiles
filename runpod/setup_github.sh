@@ -37,6 +37,7 @@ SSH_KEY_TYPE="$3"
 log_info "Setting up SSH directory..."
 mkdir -p /workspace/.ssh
 chmod 700 /workspace/.ssh
+chown root:root /workspace/.ssh
 
 # Create symlink from /root/.ssh to /workspace/.ssh
 if [[ ! -L /root/.ssh ]]; then
@@ -52,9 +53,23 @@ SSH_KEY_PATH="/workspace/.ssh/id_$SSH_KEY_TYPE"
 if [[ ! -f "$SSH_KEY_PATH" ]]; then
     log_info "Generating SSH key ($SSH_KEY_TYPE)..."
     ssh-keygen -t "$SSH_KEY_TYPE" -f "$SSH_KEY_PATH" -N "" -C "$GITHUB_EMAIL"
+    # Set proper permissions for SSH keys
+    chmod 600 "$SSH_KEY_PATH"
+    chmod 644 "${SSH_KEY_PATH}.pub"
+    chown root:root "$SSH_KEY_PATH" "${SSH_KEY_PATH}.pub"
     log_success "SSH key generated in persistent storage"
 else
     log_info "SSH key already exists in persistent storage"
+fi
+
+# Ensure SSH key permissions are correct (in case they were corrupted)
+if [[ -f "$SSH_KEY_PATH" ]]; then
+    chmod 600 "$SSH_KEY_PATH"
+    chown root:root "$SSH_KEY_PATH"
+fi
+if [[ -f "${SSH_KEY_PATH}.pub" ]]; then
+    chmod 644 "${SSH_KEY_PATH}.pub"
+    chown root:root "${SSH_KEY_PATH}.pub"
 fi
 
 # Set up Git configuration
@@ -69,6 +84,13 @@ if [[ -f "$SCRIPT_DIR/ssh_config" && ! -f /workspace/.ssh/config ]]; then
     log_info "Copying SSH configuration..."
     cp "$SCRIPT_DIR/ssh_config" /workspace/.ssh/config
     chmod 600 /workspace/.ssh/config
+    chown root:root /workspace/.ssh/config
+fi
+
+# Ensure SSH config permissions are correct (in case it was corrupted)
+if [[ -f /workspace/.ssh/config ]]; then
+    chmod 600 /workspace/.ssh/config
+    chown root:root /workspace/.ssh/config
 fi
 
 # Display SSH public key

@@ -16,6 +16,8 @@ curl -fsSL https://raw.githubusercontent.com/cywinski/dotfiles/main/runpod/insta
 git clone https://github.com/cywinski/dotfiles.git /tmp/dotfiles && cd /tmp/dotfiles/runpod && ./setup.sh
 ```
 
+**That's it!** No separate first-time setup needed.
+
 ### Manual setup:
 ```bash
 git clone https://github.com/cywinski/dotfiles.git
@@ -60,22 +62,8 @@ cd dotfiles/runpod
 
 - ❌ Virtual environments (create these in `/workspace/projects`)
 - ❌ Cursor IDE installation
-- ❌ Development tools like tmux/fish (use `first_time_setup.sh` for these)
 - ❌ Project-specific dependencies
 - ❌ Repository cloning
-
-## First-Time Workspace Setup
-
-For your first RunPod setup, also run the workspace installer to get persistent development tools:
-
-```bash
-./first_time_setup.sh
-```
-
-This sets up persistent files in `/workspace` (one-time only):
-- **tmux** and **fish** configuration files
-- Workspace aliases and welcome script
-- Project directories
 
 ## Modular Scripts
 
@@ -83,7 +71,6 @@ This sets up persistent files in `/workspace` (one-time only):
 - `install_system.sh` - System package installation
 - `setup_env.sh` - Environment variables and directories
 - `setup_github.sh` - SSH keys and Git configuration
-- `first_time_setup.sh` - **One-time setup** for persistent tools in `/workspace`
 
 ## Configuration
 
@@ -104,17 +91,13 @@ export GITHUB_EMAIL="your_email@example.com"
 ## Post-Setup Workflow
 
 1. **First-time only**: Add SSH key to GitHub (displayed after first setup)
-2. **First-time only**: Set up persistent configuration:
-   ```bash
-   ./first_time_setup.sh
-   ```
-3. **Clone your projects to `/workspace`**:
+2. **Clone your projects to `/workspace`**:
    ```bash
    cd /workspace/projects
    git clone git@github.com:cywinski/yourproject.git
    cd yourproject
    ```
-4. **Set up project environment**:
+3. **Set up project environment**:
    ```bash
    uv venv
    source .venv/bin/activate
@@ -155,6 +138,8 @@ bash
 
 1. Start new RunPod
 2. Run setup: `curl -fsSL https://raw.githubusercontent.com/cywinski/dotfiles/main/runpod/install.sh | bash`
-3. Add SSH key to GitHub
-4. Clone projects: `cd /workspace && git clone ...`
+3. **First-time only**: Add SSH key to GitHub
+4. Clone projects: `cd /workspace/projects && git clone ...`
 5. Work normally - everything persists in `/workspace`
+
+**Subsequent restarts**: Just run step 2 again - SSH keys and configs persist!

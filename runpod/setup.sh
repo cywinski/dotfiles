@@ -68,7 +68,48 @@ if [[ "$(getent passwd root | cut -d: -f7)" != "/usr/bin/fish" ]]; then
     chsh -s /usr/bin/fish root
 fi
 
-# Create symlinks to persistent configs if they exist
+# Set up configuration files and create symlinks
+mkdir -p /workspace/config/fish
+
+# Copy configuration files if they don't exist yet
+if [[ ! -f /workspace/config/.tmux.conf && -f "$SCRIPT_DIR/tmux.conf" ]]; then
+    log_info "Copying tmux configuration to workspace..."
+    cp "$SCRIPT_DIR/tmux.conf" /workspace/config/.tmux.conf
+fi
+
+if [[ ! -f /workspace/config/fish/config.fish && -f "$SCRIPT_DIR/fish_config.fish" ]]; then
+    log_info "Copying fish configuration to workspace..."
+    cp "$SCRIPT_DIR/fish_config.fish" /workspace/config/fish/config.fish
+fi
+
+# Create workspace aliases file if it doesn't exist
+if [[ ! -f /workspace/config/workspace_aliases.sh ]]; then
+    log_info "Creating workspace aliases..."
+    cat > /workspace/config/workspace_aliases.sh << 'EOF'
+# Workspace-aware aliases
+alias tm='tmux'
+
+# Quick navigation
+alias ws='cd /workspace'
+alias projects='cd /workspace/projects'
+
+# Git aliases for workspace
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+
+# Development aliases
+alias py='python'
+alias pip='uv pip'
+EOF
+fi
+
+# Create projects directory
+mkdir -p /workspace/projects
+
+# Create symlinks to persistent configs
 if [[ -f /workspace/config/.tmux.conf ]]; then
     log_info "Linking tmux configuration..."
     ln -sf /workspace/config/.tmux.conf /root/.tmux.conf
