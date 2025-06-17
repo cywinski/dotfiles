@@ -119,6 +119,12 @@ if [[ -f /workspace/config/fish/config.fish ]]; then
     log_info "Linking fish configuration..."
     mkdir -p /root/.config/fish
     ln -sf /workspace/config/fish/config.fish /root/.config/fish/config.fish
+
+    # Reload fish configuration if fish is running
+    if command -v fish >/dev/null 2>&1; then
+        log_info "Reloading fish configuration..."
+        fish -c "source /root/.config/fish/config.fish" 2>/dev/null || true
+    fi
 fi
 
 # Source workspace aliases if they exist
@@ -148,5 +154,15 @@ else
     echo "2. Test SSH: ssh -T git@github.com"
 fi
 echo ""
+if [[ -f /workspace/.ssh/id_ed25519.pub ]]; then
+    echo -e "${BLUE}Your SSH public key:${NC}"
+    cat /root/.ssh/id_ed25519.pub
+    echo ""
+fi
+
 echo -e "${BLUE}Your /workspace directory is preserved between pod restarts${NC}"
 echo -e "${GREEN}Environment is ready!${NC}"
+echo ""
+echo -e "${YELLOW}To use fish shell with aliases:${NC}"
+echo "1. Start fish: fish"
+echo "2. Or reload current fish config: source ~/.config/fish/config.fish"
