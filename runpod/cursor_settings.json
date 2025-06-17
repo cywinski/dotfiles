@@ -114,6 +114,9 @@
     },
     "interactiveWindow.executeWithShiftEnter": true,
     "security.promptForRemoteFileProtocolHandling": false,
+    "remote.SSH.serverInstallPath": {
+        "runpod1": "/workspace/.cursor-server"
+    },
     "jupyter.widgetScriptSources": [
         "jsdelivr.com",
         "unpkg.com"

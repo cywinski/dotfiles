@@ -34,6 +34,15 @@ cd dotfiles/runpod
 - `HF_HOME=/workspace/hf` (HuggingFace cache in persistent storage)
 - `HF_HUB_ENABLE_HF_TRANSFER=1` (faster HF transfers)
 - `PATH` updated for uv
+- **VSCode/Cursor persistence:**
+  - `VSCODE_EXTENSIONS=/workspace/.vscode-server/extensions`
+  - `VSCODE_USER_DATA_DIR=/workspace/.vscode-server/data`
+  - `CURSOR_USER_DATA_DIR=/workspace/.cursor-server/data`
+  - `CURSOR_EXTENSIONS_DIR=/workspace/.cursor-server/extensions`
+- **Cache directories:**
+  - `npm_config_cache=/workspace/.npm`
+  - `PIP_CACHE_DIR=/workspace/.pip-cache`
+  - `UV_CACHE_DIR=/workspace/.uv-cache`
 
 ### ✅ SSH & GitHub
 - SSH key generation (ed25519)
@@ -42,18 +51,32 @@ cd dotfiles/runpod
 
 ## What's NOT Included (Since /workspace is Persistent)
 
-- ❌ Virtual environments (create these in `/workspace`)
+- ❌ Virtual environments (create these in `/workspace/projects`)
 - ❌ Cursor IDE installation
-- ❌ Tmux/Fish configurations
+- ❌ Development tools like tmux/fish (use `first_time_setup.sh` for these)
 - ❌ Project-specific dependencies
 - ❌ Repository cloning
 
+## First-Time Workspace Setup
+
+For your first RunPod setup, also run the workspace installer to get persistent development tools:
+
+```bash
+./first_time_setup.sh
+```
+
+This installs to `/workspace` (persistent):
+- **tmux** - Terminal multiplexer
+- **fish** - Modern shell with auto-completion (set as default)
+- Configuration files and aliases
+
 ## Modular Scripts
 
-- `setup.sh` - Main orchestrator script
+- `setup.sh` - Main orchestrator script (run every time)
 - `install_system.sh` - System package installation
 - `setup_env.sh` - Environment variables and directories
 - `setup_github.sh` - SSH keys and Git configuration
+- `first_time_setup.sh` - **One-time setup** for persistent tools in `/workspace`
 
 ## Configuration
 
@@ -74,13 +97,17 @@ export GITHUB_EMAIL="your_email@example.com"
 ## Post-Setup Workflow
 
 1. **Add SSH key to GitHub** (displayed after setup)
-2. **Clone your projects to `/workspace`**:
+2. **First-time only**: Install persistent tools to `/workspace`:
    ```bash
-   cd /workspace
+   ./first_time_setup.sh
+   ```
+3. **Clone your projects to `/workspace`**:
+   ```bash
+   cd /workspace/projects
    git clone git@github.com:cywinski/yourproject.git
    cd yourproject
    ```
-3. **Set up project environment**:
+4. **Set up project environment**:
    ```bash
    uv venv
    source .venv/bin/activate
