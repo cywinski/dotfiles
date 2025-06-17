@@ -80,14 +80,14 @@ fi
 
 # Create or update SSH config to use the persistent key
 SSH_CONFIG="/workspace/.ssh/config"
-if [[ ! -f "$SSH_CONFIG" ]] || ! grep -q "IdentityFile /workspace/.ssh/id_$SSH_KEY_TYPE" "$SSH_CONFIG"; then
+if [[ ! -f "$SSH_CONFIG" ]] || ! grep -q "IdentityFile /root/.ssh/id_$SSH_KEY_TYPE" "$SSH_CONFIG"; then
     log_info "Configuring SSH to use persistent key..."
     cat >> "$SSH_CONFIG" << EOF
 
 Host github.com
   HostName github.com
   User git
-  IdentityFile /workspace/.ssh/id_$SSH_KEY_TYPE
+  IdentityFile /root/.ssh/id_$SSH_KEY_TYPE
   IdentitiesOnly yes
 EOF
     chmod 600 "$SSH_CONFIG"
