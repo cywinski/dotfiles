@@ -5,6 +5,9 @@
 
 set -e
 
+# Set secure umask to ensure files are created with correct permissions
+umask 077
+
 # Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -60,9 +63,26 @@ fi
 # Always ensure SSH key permissions are correct (RunPod may reset them)
 if [[ -f "$SSH_KEY_PATH" ]]; then
     log_info "Setting SSH key permissions..."
+    # Check current permissions
+    current_perms=$(stat -c %a "$SSH_KEY_PATH")
+    log_info "Current permissions on private key: $current_perms"
+
+    # Set permissions aggressively
     chmod 600 "$SSH_KEY_PATH"
     chown root:root "$SSH_KEY_PATH"
+
+    # Verify permissions were set
+    new_perms=$(stat -c %a "$SSH_KEY_PATH")
+    log_info "New permissions on private key: $new_perms"
+
+    if [[ "$new_perms" != "600" ]]; then
+        log_error "Cannot set proper permissions on workspace SSH key!"
+        log_error "This may be due to filesystem limitations (e.g., fat32, ntfs)"
+        log_error "SSH will refuse to use keys with incorrect permissions"
+        exit 1
+    fi
 fi
+
 if [[ -f "${SSH_KEY_PATH}.pub" ]]; then
     chmod 644 "${SSH_KEY_PATH}.pub"
     chown root:root "${SSH_KEY_PATH}.pub"
@@ -98,18 +118,26 @@ fi
 
 # Create symlinks for SSH keys (these are the large files we want to persist)
 if [[ -f "/workspace/.ssh/id_$SSH_KEY_TYPE" ]]; then
-    log_info "Linking SSH keys..."
     # Remove existing files/links first
     rm -f "/root/.ssh/id_$SSH_KEY_TYPE"
     rm -f "/root/.ssh/id_$SSH_KEY_TYPE.pub"
-    # Create fresh symlinks
-    ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE" "/root/.ssh/id_$SSH_KEY_TYPE"
-    ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE.pub" "/root/.ssh/id_$SSH_KEY_TYPE.pub"
 
-    # Verify the source files have correct permissions before linking
-    chmod 600 "/workspace/.ssh/id_$SSH_KEY_TYPE"
-    chmod 644 "/workspace/.ssh/id_$SSH_KEY_TYPE.pub"
-    chown root:root "/workspace/.ssh/id_$SSH_KEY_TYPE" "/workspace/.ssh/id_$SSH_KEY_TYPE.pub"
+    # Check if we can set proper permissions on workspace files
+    workspace_perms=$(stat -c %a "/workspace/.ssh/id_$SSH_KEY_TYPE")
+    log_info "Workspace key permissions: $workspace_perms"
+
+    if [[ "$workspace_perms" == "600" ]]; then
+        log_info "Linking SSH keys..."
+        ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE" "/root/.ssh/id_$SSH_KEY_TYPE"
+        ln -sf "/workspace/.ssh/id_$SSH_KEY_TYPE.pub" "/root/.ssh/id_$SSH_KEY_TYPE.pub"
+    else
+        log_warning "Workspace permissions cannot be set to 600, copying keys instead"
+        cp "/workspace/.ssh/id_$SSH_KEY_TYPE" "/root/.ssh/id_$SSH_KEY_TYPE"
+        cp "/workspace/.ssh/id_$SSH_KEY_TYPE.pub" "/root/.ssh/id_$SSH_KEY_TYPE.pub"
+        chmod 600 "/root/.ssh/id_$SSH_KEY_TYPE"
+        chmod 644 "/root/.ssh/id_$SSH_KEY_TYPE.pub"
+        chown root:root "/root/.ssh/id_$SSH_KEY_TYPE" "/root/.ssh/id_$SSH_KEY_TYPE.pub"
+    fi
 fi
 
 # Display SSH public key
