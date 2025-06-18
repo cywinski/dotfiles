@@ -46,7 +46,7 @@ mkdir -p /workspace/.ssh
 chmod 700 /workspace/.ssh
 
 # Generate SSH key if it doesn't exist in persistent storage
-SSH_KEY_PATH="/root/.ssh/id_$SSH_KEY_TYPE"
+SSH_KEY_PATH="/workspace/.ssh/id_$SSH_KEY_TYPE"
 if [[ ! -f "$SSH_KEY_PATH" ]]; then
     log_info "Generating SSH key ($SSH_KEY_TYPE)..."
     ssh-keygen -t "$SSH_KEY_TYPE" -f "$SSH_KEY_PATH" -N "" -C "$GITHUB_EMAIL"
@@ -80,39 +80,23 @@ fi
 
 # Create or update SSH config to use the persistent key
 SSH_CONFIG="/workspace/.ssh/config"
-if [[ ! -f "$SSH_CONFIG" ]] || ! grep -q "IdentityFile /root/.ssh/id_$SSH_KEY_TYPE" "$SSH_CONFIG"; then
+if [[ ! -f "$SSH_CONFIG" ]] || ! grep -q "IdentityFile /workspace/.ssh/id_$SSH_KEY_TYPE" "$SSH_CONFIG"; then
     log_info "Configuring SSH to use persistent key..."
     cat >> "$SSH_CONFIG" << EOF
 
 Host github.com
   HostName github.com
   User git
-  IdentityFile /root/.ssh/id_$SSH_KEY_TYPE
+  IdentityFile /workspace/.ssh/id_$SSH_KEY_TYPE
   IdentitiesOnly yes
 EOF
     chmod 600 "$SSH_CONFIG"
 fi
 
-# Link entire .ssh directory to /root (this is the key part!)
+# Link entire .ssh directory to /root for persistence
 log_info "Linking SSH directory to /root..."
 rm -rf /root/.ssh
 ln -s /workspace/.ssh /root/.ssh
-
-# Bunch of GPT output to fix key
-mkdir -p /workspace/ssh_keys
-chmod 700 /workspace/ssh_keys
-mv /workspace/.ssh/* /workspace/ssh_keys/
-chmod 600 /workspace/ssh_keys/id_ed25519
-chmod 644 /workspace/ssh_keys/id_ed25519.pub
-chmod 600 /workspace/ssh_keys/config
-rm -rf /root/.ssh
-mkdir -p /root/.ssh
-cp -r /workspace/ssh_keys/* /root/.ssh/
-chmod 700 /root/.ssh
-chmod 600 /root/.ssh/id_ed25519
-chmod 644 /root/.ssh/id_ed25519.pub
-chmod 600 /root/.ssh/config
-
 
 # Display SSH public key
 echo ""
