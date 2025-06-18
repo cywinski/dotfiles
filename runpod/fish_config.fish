@@ -71,10 +71,3 @@ echo "🚀 RunPod environment ready!"
 echo "💡 Use 'jlab' to start Jupyter Lab"
 echo "📁 Current directory: "(pwd)
 echo "🐟 Fish config loaded with aliases"
-
-# Auto-start tmux if not already in tmux and SSH session
-if status is-interactive
-    and not set -q TMUX
-    and set -q SSH_CONNECTION
-    exec tmux new-session -A -s main
-end
