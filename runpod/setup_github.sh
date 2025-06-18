@@ -61,6 +61,18 @@ chmod 700 /workspace/.ssh
 chmod 600 "$SSH_KEY_PATH"
 chmod 644 "${SSH_KEY_PATH}.pub"
 
+# Preserve authorized_keys if it exists, or create empty one
+AUTHORIZED_KEYS="/workspace/.ssh/authorized_keys"
+if [[ ! -f "$AUTHORIZED_KEYS" ]] && [[ -f /root/.ssh/authorized_keys ]]; then
+    log_info "Moving existing authorized_keys to persistent storage..."
+    cp /root/.ssh/authorized_keys "$AUTHORIZED_KEYS"
+    chmod 600 "$AUTHORIZED_KEYS"
+elif [[ ! -f "$AUTHORIZED_KEYS" ]]; then
+    log_info "Creating empty authorized_keys in persistent storage..."
+    touch "$AUTHORIZED_KEYS"
+    chmod 600 "$AUTHORIZED_KEYS"
+fi
+
 # Set up Git configuration
 log_info "Configuring Git..."
 git config --global user.name "$GITHUB_USERNAME"

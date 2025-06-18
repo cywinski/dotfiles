@@ -33,7 +33,8 @@ apt-get install -y \
     python3-pip \
     openssh-client \
     unzip \
-    software-properties-common
+    software-properties-common \
+    vim
 
 # Install uv (Python package manager)
 log_info "Installing uv..."

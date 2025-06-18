@@ -133,6 +133,9 @@ if [[ -f /workspace/config/workspace_aliases.sh ]]; then
         log_info "Adding workspace aliases to bashrc..."
         echo "source /workspace/config/workspace_aliases.sh" >> /root/.bashrc
     fi
+    # Source aliases immediately for current session
+    log_info "Sourcing workspace aliases for current session..."
+    source /workspace/config/workspace_aliases.sh
 fi
 
 # Add welcome script if it exists
@@ -141,6 +144,16 @@ if [[ -f /workspace/config/welcome.sh ]]; then
         log_info "Adding welcome script to bashrc..."
         echo "/workspace/config/welcome.sh" >> /root/.bashrc
     fi
+fi
+
+# Source environment variables for current session
+log_info "Sourcing environment variables for current session..."
+source /root/.bashrc
+
+# Source tmux configuration if tmux is running
+if command -v tmux >/dev/null 2>&1 && tmux list-sessions >/dev/null 2>&1; then
+    log_info "Reloading tmux configuration..."
+    tmux source-file /root/.tmux.conf 2>/dev/null || true
 fi
 
 log_success "RunPod minimal setup completed!"
