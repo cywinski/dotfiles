@@ -62,10 +62,14 @@ log_info "Stage 4: Installing essential development tools..."
 apt update
 apt install -y tmux fish
 
-# Set fish as default shell if not already set
-if [[ "$(getent passwd root | cut -d: -f7)" != "/usr/bin/fish" ]]; then
-    log_info "Setting fish as default shell..."
-    chsh -s /usr/bin/fish root
+# Don't set fish as default shell system-wide to avoid SSH hook conflicts
+# Instead, make it easy to switch to fish when desired
+log_info "Fish installed and configured (use 'fish' to start)"
+
+# Add fish starter aliases to bashrc for easy access
+if ! grep -q "alias f=" /root/.bashrc; then
+    echo "alias f='fish'" >> /root/.bashrc
+    echo "alias fishell='fish'" >> /root/.bashrc
 fi
 
 # Set up configuration files and create symlinks
@@ -176,12 +180,10 @@ fi
 echo -e "${BLUE}Your /workspace directory is preserved between pod restarts${NC}"
 echo -e "${GREEN}Environment is ready!${NC}"
 echo ""
-echo -e "${YELLOW}To use fish shell with aliases:${NC}"
-echo "1. Start fish: fish"
-echo "2. Or reload current fish config: source ~/.config/fish/config.fish"
-echo "3. For tmux: tmux kill-server && tmux (to restart tmux with fish)"
+echo -e "${YELLOW}To use fish shell:${NC}"
+echo "1. Start fish: fish (or use alias 'f')"
+echo "2. Start tmux with fish: tmux (fish config will auto-load)"
+echo "3. Fish aliases: projects, ws, gs, etc. (work in fish sessions)"
 echo ""
-echo -e "${YELLOW}Troubleshooting fish aliases in tmux:${NC}"
-echo "- Check config exists: ls -la ~/.config/fish/config.fish"
-echo "- Test alias manually in fish: fish -c 'projects'"
-echo "- Restart tmux server: tmux kill-server && tmux"
+echo -e "${YELLOW}Note:${NC} Bash remains default shell to avoid SSH conflicts"
+echo "Fish is fully configured and ready - just type 'fish' to use it!"
