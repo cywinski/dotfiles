@@ -28,13 +28,6 @@ log_info "Setting up HuggingFace environment variables..."
 echo "export HF_HOME=/workspace/hf" >> /root/.bashrc
 echo "export HF_HUB_ENABLE_HF_TRANSFER=1" >> /root/.bashrc
 
-# Set up VSCode/Cursor environment variables for persistence
-log_info "Setting up VSCode/Cursor environment variables..."
-echo "export VSCODE_EXTENSIONS=/workspace/.vscode-server/extensions" >> /root/.bashrc
-echo "export VSCODE_USER_DATA_DIR=/workspace/.vscode-server/data" >> /root/.bashrc
-echo "export CURSOR_USER_DATA_DIR=/workspace/.cursor-server/data" >> /root/.bashrc
-echo "export CURSOR_EXTENSIONS_DIR=/workspace/.cursor-server/extensions" >> /root/.bashrc
-
 # Set up additional cache directories for persistence
 log_info "Setting up additional cache directories..."
 echo "export npm_config_cache=/workspace/.npm" >> /root/.bashrc
@@ -44,8 +37,6 @@ echo "export UV_CACHE_DIR=/workspace/.uv-cache" >> /root/.bashrc
 # Create workspace subdirectories
 log_info "Creating workspace subdirectories..."
 mkdir -p /workspace/hf
-mkdir -p /workspace/.vscode-server/{extensions,data}
-mkdir -p /workspace/.cursor-server/{extensions,data}
 mkdir -p /workspace/.npm
 mkdir -p /workspace/.pip-cache
 mkdir -p /workspace/.uv-cache
