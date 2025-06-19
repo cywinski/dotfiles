@@ -123,6 +123,9 @@ alias gl='git log --oneline'
 # Development aliases
 alias py='python'
 alias pip='uv pip'
+
+# GPU aliases
+alias smi='nvidia-smi'
 EOF
 fi
 

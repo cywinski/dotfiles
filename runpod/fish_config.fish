@@ -39,6 +39,9 @@ alias tmn 'tmux new-session'
 alias jlab 'jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root'
 alias jnb 'jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root'
 
+# GPU aliases
+alias smi 'nvidia-smi'
+
 # Custom functions
 function mkcd
     mkdir -p $argv[1]
