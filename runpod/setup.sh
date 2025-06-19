@@ -62,6 +62,22 @@ log_info "Stage 4: Installing essential development tools..."
 apt update
 apt install -y tmux fish
 
+# --- NEW: Install Oh My Tmux ---------------------------------------------------
+OH_MY_TMUX_DIR="/workspace/config/.tmux"
+if [[ ! -d "$OH_MY_TMUX_DIR" ]]; then
+    log_info "Cloning Oh My Tmux configuration..."
+    git clone --depth 1 https://github.com/gpakosz/.tmux.git "$OH_MY_TMUX_DIR"
+else
+    log_info "Updating Oh My Tmux configuration..."
+    git -C "$OH_MY_TMUX_DIR" pull --ff-only || true
+fi
+
+# Provide a custom tmux.conf.local (persistent)
+if [[ ! -f /workspace/config/.tmux.conf.local && -f "$SCRIPT_DIR/tmux.conf.local" ]]; then
+    log_info "Copying custom tmux.conf.local to workspace..."
+    cp "$SCRIPT_DIR/tmux.conf.local" /workspace/config/.tmux.conf.local
+fi
+
 # Don't set fish as default shell system-wide to avoid SSH hook conflicts
 # Instead, make it easy to switch to fish when desired
 log_info "Fish installed and configured (use 'fish' to start)"
@@ -114,9 +130,16 @@ fi
 mkdir -p /workspace/projects
 
 # Create symlinks to persistent configs
-if [[ -f /workspace/config/.tmux.conf ]]; then
-    log_info "Linking tmux configuration..."
-    ln -sf /workspace/config/.tmux.conf /root/.tmux.conf
+# Link Oh My Tmux main configuration
+if [[ -f "$OH_MY_TMUX_DIR/.tmux.conf" ]]; then
+    log_info "Linking Oh My Tmux configuration..."
+    ln -sf "$OH_MY_TMUX_DIR/.tmux.conf" /root/.tmux.conf
+fi
+
+# Link custom local configuration if present
+if [[ -f /workspace/config/.tmux.conf.local ]]; then
+    log_info "Linking custom tmux.conf.local..."
+    ln -sf /workspace/config/.tmux.conf.local /root/.tmux.conf.local
 fi
 
 if [[ -f /workspace/config/fish/config.fish ]]; then
