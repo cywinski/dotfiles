@@ -124,6 +124,15 @@ alias gl='git log --oneline'
 alias py='python'
 alias pip='uv pip'
 
+# Node.js aliases
+alias n='node'
+alias ni='npm install'
+alias nid='npm install --save-dev'
+alias nr='npm run'
+alias ns='npm start'
+alias nt='npm test'
+alias nb='npm run build'
+
 # GPU aliases
 alias smi='nvidia-smi'
 EOF

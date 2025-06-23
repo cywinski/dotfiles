@@ -23,6 +23,14 @@ log_info "Adding uv to PATH..."
 export PATH="$HOME/.local/bin:$PATH"
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> /root/.bashrc
 
+# Set up nvm environment
+log_info "Setting up nvm environment..."
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    echo 'export NVM_DIR="$HOME/.nvm"' >> /root/.bashrc
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /root/.bashrc
+    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /root/.bashrc
+fi
+
 # Set up HuggingFace environment variables
 log_info "Setting up HuggingFace environment variables..."
 echo "export HF_HOME=/workspace/hf" >> /root/.bashrc
