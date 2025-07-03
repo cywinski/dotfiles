@@ -112,18 +112,10 @@ EOF
     chmod 600 "$SSH_CONFIG"
 fi
 
-# Link entire .ssh directory to /root for persistence
-log_info "Linking SSH directory to /root..."
-rm -rf /root/.ssh
-ln -s /workspace/.ssh /root/.ssh
-
-# Ensure all SSH files have correct permissions after linking
-log_info "Enforcing correct SSH file permissions..."
-chmod 700 /workspace/.ssh
-find /workspace/.ssh -name "id_*" -not -name "*.pub" -exec chmod 600 {} \;
-find /workspace/.ssh -name "*.pub" -exec chmod 644 {} \;
-chmod 600 /workspace/.ssh/authorized_keys 2>/dev/null || true
-chmod 600 /workspace/.ssh/config 2>/dev/null || true
+# Sync SSH files from persistent storage to /root/.ssh with correct permissions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+log_info "Syncing SSH files to /root/.ssh..."
+"$SCRIPT_DIR/sync_ssh.sh" to_root
 
 # Display SSH public key
 echo ""
@@ -143,13 +135,19 @@ fi
 
 # Final permissions verification
 log_info "Verifying SSH file permissions..."
+echo "Workspace SSH permissions:"
 ls -la /workspace/.ssh/
+echo ""
+echo "Root SSH permissions:"
+ls -la /root/.ssh/
 
 # Fix any incorrect permissions one more time
-chmod 700 /workspace/.ssh
+chmod 700 /workspace/.ssh /root/.ssh
 find /workspace/.ssh -name "id_*" -not -name "*.pub" -exec chmod 600 {} \;
 find /workspace/.ssh -name "*.pub" -exec chmod 644 {} \;
-chmod 600 /workspace/.ssh/authorized_keys 2>/dev/null || true
-chmod 600 /workspace/.ssh/config 2>/dev/null || true
+find /root/.ssh -name "id_*" -not -name "*.pub" -exec chmod 600 {} \;
+find /root/.ssh -name "*.pub" -exec chmod 644 {} \;
+chmod 600 /workspace/.ssh/authorized_keys /root/.ssh/authorized_keys 2>/dev/null || true
+chmod 600 /workspace/.ssh/config /root/.ssh/config 2>/dev/null || true
 
 log_success "GitHub and SSH setup complete"

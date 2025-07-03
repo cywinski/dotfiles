@@ -37,6 +37,35 @@ log_error() {
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Set up SSH backup on shutdown
+setup_ssh_backup() {
+    log_info "Setting up SSH backup service..."
+
+    # Create SSH backup service
+    cat > /etc/systemd/system/ssh-backup.service << EOF
+[Unit]
+Description=Backup SSH files to persistent storage
+DefaultDependencies=false
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/true
+ExecStop=$SCRIPT_DIR/sync_ssh.sh to_workspace
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # Enable the service
+    systemctl enable ssh-backup.service
+    systemctl start ssh-backup.service
+
+    log_success "SSH backup service configured"
+}
+
 echo -e "${BLUE}🚀 RunPod Minimal Setup${NC}"
 echo "Setting up non-persistent pod-wide configurations..."
 echo ""
@@ -56,6 +85,9 @@ log_info "Stage 2: Setting up environment variables..."
 # Stage 3: Set up SSH and GitHub
 log_info "Stage 3: Setting up SSH keys and GitHub..."
 "$SCRIPT_DIR/setup_github.sh" "$GITHUB_USERNAME" "$GITHUB_EMAIL" "$SSH_KEY_TYPE"
+
+# Set up SSH backup service for persistence
+setup_ssh_backup
 
 # Stage 4: Install essential development tools
 log_info "Stage 4: Installing essential development tools..."
