@@ -49,7 +49,12 @@ chmod 700 /workspace/.ssh
 SSH_KEY_PATH="/workspace/.ssh/id_$SSH_KEY_TYPE"
 if [[ ! -f "$SSH_KEY_PATH" ]]; then
     log_info "Generating SSH key ($SSH_KEY_TYPE)..."
+    # Set restrictive umask before key generation
+    umask 077
     ssh-keygen -t "$SSH_KEY_TYPE" -f "$SSH_KEY_PATH" -N "" -C "$GITHUB_EMAIL"
+    # Immediately set correct permissions after generation
+    chmod 600 "$SSH_KEY_PATH"
+    chmod 644 "${SSH_KEY_PATH}.pub"
     log_success "SSH key generated in persistent storage"
 else
     log_info "SSH key already exists in persistent storage"
@@ -85,6 +90,7 @@ if [[ -f "$SCRIPT_DIR/ssh_config" ]]; then
     # Copy SSH config to persistent storage if it doesn't exist
     if [[ ! -f /workspace/.ssh/config ]]; then
         log_info "Copying SSH configuration to persistent storage..."
+        umask 077
         cp "$SCRIPT_DIR/ssh_config" /workspace/.ssh/config
         chmod 600 /workspace/.ssh/config
     fi
@@ -94,6 +100,7 @@ fi
 SSH_CONFIG="/workspace/.ssh/config"
 if [[ ! -f "$SSH_CONFIG" ]] || ! grep -q "IdentityFile /workspace/.ssh/id_$SSH_KEY_TYPE" "$SSH_CONFIG"; then
     log_info "Configuring SSH to use persistent key..."
+    umask 077
     cat >> "$SSH_CONFIG" << EOF
 
 Host github.com
@@ -110,6 +117,14 @@ log_info "Linking SSH directory to /root..."
 rm -rf /root/.ssh
 ln -s /workspace/.ssh /root/.ssh
 
+# Ensure all SSH files have correct permissions after linking
+log_info "Enforcing correct SSH file permissions..."
+chmod 700 /workspace/.ssh
+find /workspace/.ssh -name "id_*" -not -name "*.pub" -exec chmod 600 {} \;
+find /workspace/.ssh -name "*.pub" -exec chmod 644 {} \;
+chmod 600 /workspace/.ssh/authorized_keys 2>/dev/null || true
+chmod 600 /workspace/.ssh/config 2>/dev/null || true
+
 # Display SSH public key
 echo ""
 log_success "SSH public key (add this to GitHub):"
@@ -125,5 +140,16 @@ else
     log_warning "SSH connection test failed - you may need to add the key to GitHub first"
     echo "Run: ssh -T git@github.com"
 fi
+
+# Final permissions verification
+log_info "Verifying SSH file permissions..."
+ls -la /workspace/.ssh/
+
+# Fix any incorrect permissions one more time
+chmod 700 /workspace/.ssh
+find /workspace/.ssh -name "id_*" -not -name "*.pub" -exec chmod 600 {} \;
+find /workspace/.ssh -name "*.pub" -exec chmod 644 {} \;
+chmod 600 /workspace/.ssh/authorized_keys 2>/dev/null || true
+chmod 600 /workspace/.ssh/config 2>/dev/null || true
 
 log_success "GitHub and SSH setup complete"
