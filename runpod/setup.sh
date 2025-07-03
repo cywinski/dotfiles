@@ -37,34 +37,6 @@ log_error() {
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Set up SSH backup on shutdown
-setup_ssh_backup() {
-    log_info "Setting up SSH backup service..."
-
-    # Create SSH backup service
-    cat > /etc/systemd/system/ssh-backup.service << EOF
-[Unit]
-Description=Backup SSH files to persistent storage
-DefaultDependencies=false
-Before=shutdown.target reboot.target halt.target
-
-[Service]
-Type=oneshot
-RemainAfterExit=true
-ExecStart=/bin/true
-ExecStop=$SCRIPT_DIR/sync_ssh.sh to_workspace
-TimeoutStopSec=30
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    # Enable the service
-    systemctl enable ssh-backup.service
-    systemctl start ssh-backup.service
-
-    log_success "SSH backup service configured"
-}
 
 echo -e "${BLUE}🚀 RunPod Minimal Setup${NC}"
 echo "Setting up non-persistent pod-wide configurations..."
@@ -82,12 +54,11 @@ log_info "Stage 1: Installing system dependencies..."
 log_info "Stage 2: Setting up environment variables..."
 "$SCRIPT_DIR/setup_env.sh"
 
-# Stage 3: Set up SSH and GitHub
-log_info "Stage 3: Setting up SSH keys and GitHub..."
-"$SCRIPT_DIR/setup_github.sh" "$GITHUB_USERNAME" "$GITHUB_EMAIL" "$SSH_KEY_TYPE"
-
-# Set up SSH backup service for persistence
-setup_ssh_backup
+# Stage 3: Set up Git configuration
+log_info "Stage 3: Setting up Git configuration..."
+git config --global user.name "$GITHUB_USERNAME"
+git config --global user.email "$GITHUB_EMAIL"
+git config --global init.defaultBranch main
 
 # Stage 4: Install essential development tools
 log_info "Stage 4: Installing essential development tools..."
@@ -228,21 +199,6 @@ if command -v tmux >/dev/null 2>&1 && tmux list-sessions >/dev/null 2>&1; then
 fi
 
 log_success "RunPod minimal setup completed!"
-echo ""
-if [[ -f /workspace/.ssh/id_ed25519.pub ]]; then
-    echo -e "${GREEN}SSH key ready! (persistent across restarts)${NC}"
-    echo "Test connection: ssh -T git@github.com"
-else
-    echo -e "${YELLOW}Next steps:${NC}"
-    echo "1. Add your SSH public key to GitHub (displayed above)"
-    echo "2. Test SSH: ssh -T git@github.com"
-fi
-echo ""
-if [[ -f /workspace/.ssh/id_ed25519.pub ]]; then
-    echo -e "${BLUE}Your SSH public key:${NC}"
-    cat /root/.ssh/id_ed25519.pub
-    echo ""
-fi
 
 echo -e "${BLUE}Your /workspace directory is preserved between pod restarts${NC}"
 echo -e "${GREEN}Environment is ready!${NC}"
