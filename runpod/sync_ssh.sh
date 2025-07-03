@@ -31,9 +31,9 @@ set_ssh_permissions() {
         chmod 700 "$ssh_dir"
         find "$ssh_dir" -name "id_*" -not -name "*.pub" -exec chmod 600 {} \; 2>/dev/null || true
         find "$ssh_dir" -name "*.pub" -exec chmod 644 {} \; 2>/dev/null || true
-        chmod 600 "$ssh_dir/authorized_keys" 2>/dev/null || true
-        chmod 600 "$ssh_dir/config" 2>/dev/null || true
-        chmod 600 "$ssh_dir/known_hosts" 2>/dev/null || true
+        [[ -f "$ssh_dir/authorized_keys" ]] && chmod 600 "$ssh_dir/authorized_keys"
+        [[ -f "$ssh_dir/config" ]] && chmod 600 "$ssh_dir/config"
+        [[ -f "$ssh_dir/known_hosts" ]] && chmod 600 "$ssh_dir/known_hosts"
     fi
 }
 
