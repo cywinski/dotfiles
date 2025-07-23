@@ -52,7 +52,6 @@ export GITHUB_EMAIL="your_email@example.com"
 - **tmux** and **fish** (installed fresh each restart)
 
 ### ✅ Environment Variables (set each restart)
-- `HF_HOME=/workspace/hf` (HuggingFace cache in persistent storage)
 - `HF_HUB_ENABLE_HF_TRANSFER=1` (faster HF transfers)
 - `PATH` updated for uv
 - **Cache directories:**

@@ -32,8 +32,6 @@ if [ -s "$HOME/.nvm/nvm.sh" ]; then
 fi
 
 # Set up HuggingFace environment variables
-log_info "Setting up HuggingFace environment variables..."
-echo "export HF_HOME=/workspace/hf" >> /root/.bashrc
 echo "export HF_HUB_ENABLE_HF_TRANSFER=1" >> /root/.bashrc
 
 # Set up additional cache directories for persistence
@@ -44,7 +42,6 @@ echo "export UV_CACHE_DIR=/workspace/.uv-cache" >> /root/.bashrc
 
 # Create workspace subdirectories
 log_info "Creating workspace subdirectories..."
-mkdir -p /workspace/hf
 mkdir -p /workspace/.npm
 mkdir -p /workspace/.pip-cache
 mkdir -p /workspace/.uv-cache

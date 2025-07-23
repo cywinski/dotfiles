@@ -36,38 +36,6 @@ apt-get install -y \
     software-properties-common \
     vim
 
-# Install Node.js via nvm (Node Version Manager)
-log_info "Installing Node.js via nvm..."
-if ! command -v node >/dev/null 2>&1; then
-    # Download and install nvm
-    log_info "Installing nvm..."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-
-    # Source nvm in current session
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-        # Download and install Node.js LTS (v22)
-    log_info "Installing Node.js v22 via nvm..."
-    nvm install 22
-    nvm use 22
-
-    # Install global npm packages
-    log_info "Installing global npm packages..."
-    npm install -g @anthropic-ai/claude-code
-
-    # Verify installation
-    NODE_VERSION=$(node -v)
-    NPM_VERSION=$(npm -v)
-    NVM_CURRENT=$(nvm current)
-
-    log_success "Node.js $NODE_VERSION and npm $NPM_VERSION installed successfully"
-    log_success "@anthropic-ai/claude-code installed globally"
-    log_info "nvm current version: $NVM_CURRENT"
-else
-    log_info "Node.js already installed: $(node --version)"
-fi
-
 # Install uv (Python package manager)
 log_info "Installing uv..."
 if ! command -v uv >/dev/null 2>&1; then
