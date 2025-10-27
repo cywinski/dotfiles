@@ -3,6 +3,7 @@
     "cSpell.enabledLanguageIds": [
         "markdown"
     ],
+    "workbench.panel.defaultLocation": "right",
     "workbench.iconTheme": "vscode-icons",
     "workbench.editorAssociations": {
         "*.ipynb": "jupyter-notebook",
@@ -15,12 +16,17 @@
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "[python]": {
         "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.codeActionsOnSave": {
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
-        },
-        "editor.defaultFormatter": "charliermarsh.ruff"
+        }
     },
+    "ruff.enable": true,
+    "ruff.organizeImports": true,
+    "ruff.fixAll": true,
+    "claudeCode.useTerminal": true,
+    "ruff.lint.run": "onSave",
     "remote.SSH.remotePlatform": {
         "titan4.ii.pw.edu.pl": "linux",
         "athena.cyfronet.pl": "linux",
@@ -50,10 +56,10 @@
     "editor.formatOnPaste": true,
     "autoDocstring.docstringFormat": "sphinx",
     "workbench.colorTheme": "One Dark Pro Mix",
-    "editor.fontSize": 16,
-    "terminal.integrated.fontSize": 15,
-    "markdown.preview.fontSize": 16,
-    "debug.console.fontSize": 16,
+    "editor.fontSize": 15,
+    "terminal.integrated.fontSize": 14,
+    "markdown.preview.fontSize": 13,
+    "debug.console.fontSize": 13,
     "window.zoomLevel": 0,
     "gitlens.views.branches.branches.layout": "list",
     "vsicons.dontShowNewVersionMessage": true,
@@ -94,54 +100,34 @@
     "security.workspace.trust.untrustedFiles": "open",
     "terminal.integrated.enableMultiLinePasteWarning": "never",
     "terminal.integrated.shellIntegration.enabled": true,
-    "window.commandCenter": true,
+    "window.commandCenter": false,
     "workbench.editor.enablePreview": true,
     "workbench.editor.wrapTabs": false,
-    "projectManager.git.baseFolders": [
-        "/home/bartosz/code"
-    ],
     "remote.extensionKind": {
         "alefragnani.project-manager": [
             "workspace"
         ],
         "GitHub.copilot": [
             "ui"
-        ]
+        ],
+        "WakaTime.vscode-wakatime": ["ui"]
     },
     "mypy-type-checker.severity": {
         "error": "Error",
         "note": "Information"
     },
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    // Editor settings
     "mypy.runUsingActiveInterpreter": true,
     "workbench.colorCustomizations": {},
     "terminal.integrated.inheritEnv": false,
-    "mypy-type-checker.args": [
-        "--config-file=mypy.ini"
-    ],
     "github.copilot.editor.enableAutoCompletions": true,
     "github.copilot.preferredAccount": "cywinski",
-    "accessibility.signals.voiceRecordingStarted": {
-        "sound": "auto"
-    },
     "interactiveWindow.executeWithShiftEnter": true,
     "security.promptForRemoteFileProtocolHandling": false,
-    "remote.SSH.serverInstallPath": {
-        "athena.cyfronet.pl": "/net/tscratch/people/plgbcywinski/vscode-server",
-        "helios": "/net/scratch/hscra/plgrid/plgbcywinski/"
-    },
-    "remote.SSH.useExecServer": false,
-    "jupyter.widgetScriptSources": [
-        "jsdelivr.com",
-        "unpkg.com"
-    ],
     "workbench.editorLargeFileConfirmation": 50,
     "editor.formatOnSaveMode": "modifications",
-    "cursor.cpp.disabledLanguages": [
-        "plaintext",
-        "markdown",
-        "scminput"
-    ],
-    "cursor.cpp.enablePartialAccepts": true,
     "terminal.integrated.profiles.linux": {
         "bash": {
             "path": "bash",
@@ -171,7 +157,7 @@
             ]
         }
     },
-    "terminal.integrated.defaultProfile.linux": "tmux-shell",
+    "terminal.integrated.defaultProfile.linux": "bash",
     "cSpell.userWords": [
         "autocast",
         "bcywinski",
@@ -179,13 +165,86 @@
         "dataroot",
         "ddim",
         "DDPM",
+        "idxs",
+        "interpretability",
+        "mypy",
         "pretrained",
         "sokoban",
         "subgoal",
+        "tfidf",
         "timestep",
         "timesteps",
         "unet",
         "xformers",
         "xstart"
-    ]
+    ],
+    "cursor.cpp.disabledLanguages": [
+        "plaintext",
+        "scminput",
+        "latex"
+    ],
+    "gitlens.advanced.messages": {
+        "suppressLineUncommittedWarning": true
+    },
+    "explorer.confirmPasteNative": false,
+    "cursor.composer.shouldChimeAfterChatFinishes": true,
+    "cursor.cpp.enablePartialAccepts": true,
+    "cursorpyright.analysis.typeCheckingMode": "off",
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.enablePersistentSessions": false,
+    "remote.SSH.defaultExtensions": [
+        "eamodio.gitlens",
+        "visualstudioexptteam",
+        "ms-toolsai.jupyter",
+        "yzhang.markdown-all-in-one",
+        "mutantdino.resourc",
+        "ms-python.python",
+        "anthropic.claude-code",
+        "charliermarsh.ruff",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "mechatroner.rainbow-csv",
+        "visualstudioexptteam"
+    ],
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.intellisense.package.enabled": true,
+    "latex-workshop.latex.tools": [
+        {
+            "name": "latexmk",
+            "command": "/Library/TeX/texbin/latexmk",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "-pdf",
+                "-pdflatex=/Library/TeX/texbin/pdflatex",
+                "-outdir=%OUTDIR%",
+                "%DOC%"
+            ],
+            "env": {
+                "PATH": "/Library/TeX/texbin:/usr/bin:/bin"
+            }
+        },
+        {
+            "name": "pdflatex",
+            "command": "/Library/TeX/texbin/pdflatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "%DOC%"
+            ]
+        }
+    ],
+    "git.enableSmartCommit": true,
+    "[dockercompose]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "[github-actions-workflow]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
 }
