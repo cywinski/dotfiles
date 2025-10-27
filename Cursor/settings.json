@@ -13,7 +13,6 @@
         "*.JPEG": "imagePreview.previewEditor"
     },
     "editor.suggestSelection": "first",
-    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "[python]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "charliermarsh.ruff",
@@ -26,7 +25,6 @@
     "ruff.organizeImports": true,
     "ruff.fixAll": true,
     "claudeCode.useTerminal": true,
-    "ruff.lint.run": "onSave",
     "remote.SSH.remotePlatform": {
         "titan4.ii.pw.edu.pl": "linux",
         "athena.cyfronet.pl": "linux",
@@ -112,18 +110,8 @@
         ],
         "WakaTime.vscode-wakatime": ["ui"]
     },
-    "mypy-type-checker.severity": {
-        "error": "Error",
-        "note": "Information"
-    },
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": false,
-    // Editor settings
-    "mypy.runUsingActiveInterpreter": true,
     "workbench.colorCustomizations": {},
     "terminal.integrated.inheritEnv": false,
-    "github.copilot.editor.enableAutoCompletions": true,
-    "github.copilot.preferredAccount": "cywinski",
     "interactiveWindow.executeWithShiftEnter": true,
     "security.promptForRemoteFileProtocolHandling": false,
     "workbench.editorLargeFileConfirmation": 50,
@@ -189,7 +177,6 @@
     "explorer.confirmPasteNative": false,
     "cursor.composer.shouldChimeAfterChatFinishes": true,
     "cursor.cpp.enablePartialAccepts": true,
-    "cursorpyright.analysis.typeCheckingMode": "off",
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.enablePersistentSessions": false,
     "remote.SSH.defaultExtensions": [
