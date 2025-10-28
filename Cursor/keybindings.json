@@ -132,11 +132,6 @@
     },
     {
         "key": "cmd+right",
-        "command": "cursorEnd",
-        "when": "textInputFocus"
-    },
-    {
-        "key": "cmd+right",
         "command": "-cursorEnd",
         "when": "textInputFocus"
     },
