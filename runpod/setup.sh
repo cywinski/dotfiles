@@ -60,6 +60,8 @@ git config --global user.name "$GITHUB_USERNAME"
 git config --global user.email "$GITHUB_EMAIL"
 git config --global init.defaultBranch main
 
+echo 'export TZ=Europe/Warsaw' >> ~/.bashrc
+
 # Stage 4: Install essential development tools
 log_info "Stage 4: Installing essential development tools..."
 apt update
