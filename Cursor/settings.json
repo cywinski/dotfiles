@@ -4,7 +4,7 @@
         "markdown"
     ],
     "workbench.panel.defaultLocation": "right",
-    "workbench.iconTheme":"material-icon-theme",
+    "workbench.iconTheme": "material-icon-theme",
     "workbench.editorAssociations": {
         "*.ipynb": "jupyter-notebook",
         "*.wav": "default",
@@ -14,16 +14,16 @@
     },
     "editor.suggestSelection": "first",
     "[python]": {
-        "editor.formatOnSave": true,
         "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
         }
     },
-    "ruff.enable": true,
-    "ruff.organizeImports": true,
     "ruff.fixAll": true,
+    "ruff.organizeImports": true,
+    "editor.formatOnSave": true,
     "claudeCode.useTerminal": true,
     "remote.SSH.remotePlatform": {
         "titan4.ii.pw.edu.pl": "linux",
@@ -33,7 +33,9 @@
         "helios": "linux",
         "h84": "linux",
         "h85": "linux",
-        "h82": "linux"
+        "h82": "linux",
+        "pod-na2": "linux",
+        "h100_eu2": "linux"
     },
     "notebook.formatOnSave.enabled": true,
     "notebook.codeActionsOnSave": {
@@ -115,7 +117,6 @@
     "interactiveWindow.executeWithShiftEnter": true,
     "security.promptForRemoteFileProtocolHandling": false,
     "workbench.editorLargeFileConfirmation": 50,
-    "editor.formatOnSaveMode": "modifications",
     "terminal.integrated.profiles.linux": {
         "bash": {
             "path": "bash",
@@ -225,4 +226,6 @@
         }
     ],
     "git.enableSmartCommit": true,
+    "python.languageServer": "None",
+    "remote.autoForwardPortsSource": "hybrid"
 }
