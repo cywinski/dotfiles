@@ -123,18 +123,8 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git log --oneline'
 
-# Development aliases
 alias py='python'
 alias pip='uv pip'
-
-# Node.js aliases
-alias n='node'
-alias ni='npm install'
-alias nid='npm install --save-dev'
-alias nr='npm run'
-alias ns='npm start'
-alias nt='npm test'
-alias nb='npm run build'
 
 # GPU aliases
 alias smi='nvidia-smi'
@@ -178,14 +168,6 @@ if [[ -f /workspace/config/workspace_aliases.sh ]]; then
     # Source aliases immediately for current session
     log_info "Sourcing workspace aliases for current session..."
     source /workspace/config/workspace_aliases.sh
-fi
-
-# Add welcome script if it exists
-if [[ -f /workspace/config/welcome.sh ]]; then
-    if ! grep -q "welcome.sh" /root/.bashrc; then
-        log_info "Adding welcome script to bashrc..."
-        echo "/workspace/config/welcome.sh" >> /root/.bashrc
-    fi
 fi
 
 # Source environment variables for current session
