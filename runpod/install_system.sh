@@ -36,7 +36,8 @@ apt-get install -y \
     software-properties-common \
     vim
 
-apt install nvtop 
+apt install nvtop
+apt install rclone
 # Install uv (Python package manager)
 log_info "Installing uv..."
 if ! command -v uv >/dev/null 2>&1; then
