@@ -182,14 +182,14 @@ if command -v tmux >/dev/null 2>&1 && tmux list-sessions >/dev/null 2>&1; then
     tmux source-file /root/.tmux.conf 2>/dev/null || true
 fi
 
-# Stage 5: Set up Claude Code
-log_info "Stage 5: Setting up Claude Code..."
-"$SCRIPT_DIR/setup_claude.sh"
-
 log_success "RunPod minimal setup completed!"
 
 echo -e "${BLUE}Your /workspace directory is preserved between pod restarts${NC}"
 echo -e "${GREEN}Environment is ready!${NC}"
+echo ""
+echo -e "${YELLOW}Next step — set up Claude Code:${NC}"
+echo "1. Add your SSH public key to GitHub: cat ~/.ssh/id_${SSH_KEY_TYPE}.pub"
+echo "2. Run: bash $SCRIPT_DIR/setup_claude.sh"
 echo ""
 echo -e "${YELLOW}To use fish shell:${NC}"
 echo "1. Start fish: fish (or use alias 'f')"

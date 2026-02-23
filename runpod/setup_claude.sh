@@ -14,7 +14,7 @@ log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 
-DOTFILES_REPO="https://github.com/cywinski/dotfiles.git"
+DOTFILES_REPO="git@github.com:cywinski/dotfiles.git"
 DOTFILES_DIR="/workspace/dotfiles"
 
 # --- Claude Code ---

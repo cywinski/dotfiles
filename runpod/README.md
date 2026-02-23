@@ -83,6 +83,7 @@ export GITHUB_EMAIL="your_email@example.com"
 - `install_system.sh` - System package installation
 - `setup_env.sh` - Environment variables and directories
 - `setup_github.sh` - SSH keys and Git configuration
+- `setup_claude.sh` - Claude Code installation and config symlinks (run manually after adding SSH key to GitHub)
 
 ## Configuration
 
@@ -103,7 +104,11 @@ export GITHUB_EMAIL="your_email@example.com"
 ## Post-Setup Workflow
 
 1. **First-time only**: Add SSH key to GitHub (displayed after first setup)
-2. **Clone your projects to `/workspace`**:
+2. **Set up Claude Code** (requires SSH key on GitHub):
+   ```bash
+   bash /tmp/dotfiles/runpod/setup_claude.sh
+   ```
+3. **Clone your projects to `/workspace`**:
    ```bash
    cd /workspace/projects
    git clone git@github.com:cywinski/yourproject.git
@@ -154,7 +159,8 @@ bash
    git clone https://github.com/cywinski/dotfiles.git /tmp/dotfiles && cd /tmp/dotfiles/runpod && ./setup.sh
    ```
 3. **First-time only**: Add SSH key to GitHub (displayed after setup)
-4. Clone projects: `cd /workspace/projects && git clone ...`
-5. Work normally - everything persists in `/workspace`
+4. Set up Claude Code: `bash /tmp/dotfiles/runpod/setup_claude.sh`
+5. Clone projects: `cd /workspace/projects && git clone ...`
+6. Work normally - everything persists in `/workspace`
 
-**Subsequent restarts**: Just run step 2 again - SSH keys and configs persist!
+**Subsequent restarts**: Just run step 2 again, then step 4 - SSH keys and configs persist!
