@@ -65,7 +65,7 @@ echo 'export TZ=Europe/Warsaw' >> ~/.bashrc
 # Stage 4: Install essential development tools
 log_info "Stage 4: Installing essential development tools..."
 apt update
-apt install -y tmux fish
+apt install -y tmux fish htop
 
 # --- NEW: Install Oh My Tmux ---------------------------------------------------
 OH_MY_TMUX_DIR="/workspace/config/.tmux"
@@ -181,6 +181,10 @@ if command -v tmux >/dev/null 2>&1 && tmux list-sessions >/dev/null 2>&1; then
     log_info "Reloading tmux configuration..."
     tmux source-file /root/.tmux.conf 2>/dev/null || true
 fi
+
+# Stage 5: Set up Claude Code
+log_info "Stage 5: Setting up Claude Code..."
+"$SCRIPT_DIR/setup_claude.sh"
 
 log_success "RunPod minimal setup completed!"
 
