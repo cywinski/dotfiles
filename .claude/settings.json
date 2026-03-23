@@ -132,7 +132,9 @@
       "Bash(xargs -I{} dirname *)",
       "Bash(xargs -I{} grep *)",
       "Bash(xargs -I{} cut *)",
-      "Bash(xargs -I{} sed -n *)"
+      "Bash(xargs -I{} sed -n *)",
+      "WebFetch(*)",
+      "Bash(npx *)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -189,9 +191,7 @@
   },
   "enabledPlugins": {
     "code-simplifier@claude-plugins-official": true,
-    "ml-paper-writing@ai-research-skills": true,
-    "plugin-dev@claude-plugins-official": true,
-    "vercel@claude-plugins-official": true
+    "plugin-dev@claude-plugins-official": true
   },
   "effortLevel": "high"
 }
