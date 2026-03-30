@@ -1,6 +1,6 @@
 ---
 name: vllm
-description: Reference for serving LLMs with vLLM. Use when setting up vLLM inference (online or offline), configuring the server, debugging OOM/performance issues, or choosing quantization. Can also be invoked with /vllm.
+description: Reference for using vLLM. Use when setting up vLLM inference (online or offline), configuring the server, debugging OOM/performance issues, or choosing quantization. Can also be invoked with /vllm.
 ---
 
 # vLLM Reference
@@ -17,7 +17,7 @@ uv pip install vllm --torch-backend=auto
 from vllm import LLM, SamplingParams
 
 llm = LLM(model="meta-llama/Llama-3-8B-Instruct")
-sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
+sampling_params = SamplingParams(temperature=1.0, top_p=1.0)
 
 prompts = ["Hello, my name is", "The future of AI is"]
 outputs = llm.generate(prompts, sampling_params)
@@ -85,18 +85,18 @@ Or set `VLLM_API_KEY` environment variable.
 
 ## Key Server Flags
 
-| Flag | Purpose | Example |
-|---|---|---|
-| `--gpu-memory-utilization` | Fraction of GPU memory to use | `0.9` |
-| `--max-model-len` | Max sequence length | `8192` |
-| `--tensor-parallel-size` | Split model across N GPUs (power of 2) | `4` |
-| `--quantization` | Quantization method | `awq`, `gptq`, `fp8` |
-| `--enable-prefix-caching` | Cache common prefixes | - |
-| `--enable-chunked-prefill` | Chunk long prefills for lower TTFT | - |
-| `--max-num-seqs` | Max concurrent sequences | `512` |
-| `--trust-remote-code` | Required for some custom models | - |
-| `--attention-backend` | Override attention backend | `FLASH_ATTN`, `FLASHINFER` |
-| `--host` / `--port` | Bind address | `0.0.0.0` / `8000` |
+| Flag                       | Purpose                                | Example                    |
+| -------------------------- | -------------------------------------- | -------------------------- |
+| `--gpu-memory-utilization` | Fraction of GPU memory to use          | `0.9`                      |
+| `--max-model-len`          | Max sequence length                    | `8192`                     |
+| `--tensor-parallel-size`   | Split model across N GPUs (power of 2) | `4`                        |
+| `--quantization`           | Quantization method                    | `awq`, `gptq`, `fp8`       |
+| `--enable-prefix-caching`  | Cache common prefixes                  | -                          |
+| `--enable-chunked-prefill` | Chunk long prefills for lower TTFT     | -                          |
+| `--max-num-seqs`           | Max concurrent sequences               | `512`                      |
+| `--trust-remote-code`      | Required for some custom models        | -                          |
+| `--attention-backend`      | Override attention backend             | `FLASH_ATTN`, `FLASHINFER` |
+| `--host` / `--port`        | Bind address                           | `0.0.0.0` / `8000`         |
 
 ## Production Deployment
 
@@ -152,11 +152,11 @@ Use the base model name to query without LoRA applied.
 
 ## Quantization
 
-| Method | When to use |
-|---|---|
-| **AWQ** | Best for 70B models, minimal accuracy loss |
-| **GPTQ** | Wide model support, good compression |
-| **FP8** | Fastest on H100 GPUs |
+| Method   | When to use                                |
+| -------- | ------------------------------------------ |
+| **AWQ**  | Best for 70B models, minimal accuracy loss |
+| **GPTQ** | Wide model support, good compression       |
+| **FP8**  | Fastest on H100 GPUs                       |
 
 ```bash
 vllm serve TheBloke/Llama-2-70B-AWQ --quantization awq

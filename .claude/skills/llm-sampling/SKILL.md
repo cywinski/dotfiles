@@ -1,6 +1,21 @@
 ---
-description: OpenRouter API sampling conventions
+name: llm-sampling
+description: Use this skill every time when sampling responses (doing the inference) from an LLM.
 ---
+
+
+## Common Rules
+- When sampling from instruction-tuned models, make sure that a correct chat template is applied. Remember that when sampling locally, you need to do it yourself.
+- Some thinking models (e.g. Qwen3) support also non-reasoning mode. When instructed to sample from the model with thinking disabled, you should provide `enable_thinking=False` to the `tokenizer.apply_chat_template`.
+
+
+## Default Sampling Parameters
+
+Always use these parameters unless the user specifies otherwise.
+
+* **Temperature**: 1.0
+* **Max Tokens**: 2000
+
 
 # OpenRouter API Sampling
 

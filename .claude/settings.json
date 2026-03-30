@@ -138,47 +138,12 @@
       "WebFetch(*)",
       "Bash(npx *)"
     ],
-    "deny": [
-      "Bash(rm -rf /)",
-      "Bash(rm -rf ~)",
-      "Bash(sudo rm:*)",
-      "Bash(mkfs:*)",
-      "Bash(dd if=:*)",
-      "Bash(for *)",
-      "Bash(while *)",
-      "Bash(until *)",
-      "Bash(timeout *)",
-      "Bash(env *)",
-      "Bash(find * -exec *)",
-      "Bash(find * -execdir *)",
-      "Bash(awk *system\\(*)",
-      "Bash(xargs awk*system\\(*)",
-      "Bash(xargs -I{} awk*system\\(*)",
-      "Bash(xargs sh *)",
-      "Bash(xargs -I{} sh *)",
-      "Bash(xargs bash *)",
-      "Bash(xargs -I{} bash *)",
-      "Bash(cat)",
-      "Bash(git -C *)",
-      "Read(**/.env)",
-      "Read(**/.env.*)",
-      "Read(**/secrets/**)",
-      "Read(**/*credentials*)",
-      "Read(**/.ssh/**)"
+    "additionalDirectories": [
+      "/tmp"
     ]
   },
+  "defaultMode": "auto",
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/ruff-format.sh"
-          }
-        ]
-      }
-    ],
     "Notification": [
       {
         "matcher": "",

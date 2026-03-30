@@ -1,11 +1,15 @@
 ---
 name: read-arxiv-paper
-description: Use this skill when asked to read an arxiv paper given an arxiv URL. Can also be invoked with /read-arxiv-paper.
+description: Use this skill when asked to read an arxiv paper given an arxiv URL or alphaxiv URL. Can also be invoked with /read-arxiv-paper.
 argument-hint: <arxiv-url>
 ---
 
 You will be given a URL of an arxiv paper, for example:
 https://www.arxiv.org/abs/2601.07372
+
+Alternatively, you will be given a URL of an alphaxiv paper, for example:
+https://www.alphaxiv.org/abs/2601.07372
+in this case, you should just replace "alphaxiv" with "arxiv" in the URL.
 
 ### Part 1: Normalize the URL
 Rewrite the URL to point to the TeX source (not the PDF) by replacing `/abs/` with `/src/`:
