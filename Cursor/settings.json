@@ -202,7 +202,6 @@
         "pkief.material-icon-theme",
         "tomoki1207.pdf",
         "usernamehw.errorlens",
-        "yzhang.markdown-all-in-one",
         "zhuangtongfa.material-theme"
     ],
     "latex-workshop.latex.autoBuild.run": "onSave",
@@ -239,5 +238,6 @@
     ],
     "git.enableSmartCommit": true,
     "python.languageServer": "None",
-    "remote.autoForwardPortsSource": "hybrid"
+    "remote.autoForwardPortsSource": "hybrid",
+    "breadcrumbs.enabled": false
 }

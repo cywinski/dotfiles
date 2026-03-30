@@ -19,5 +19,4 @@ oderwat.indent-rainbow
 pkief.material-icon-theme
 tomoki1207.pdf
 usernamehw.errorlens
-yzhang.markdown-all-in-one
 zhuangtongfa.material-theme

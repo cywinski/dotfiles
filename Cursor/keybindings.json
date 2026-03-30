@@ -268,5 +268,15 @@
             "text": "\\\r\n"
         },
         "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+b",
+        "command": "markdown.extension.editing.toggleBold",
+        "when": "editorTextFocus && editorLangId == 'markdown'"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "markdown.extension.editing.toggleItalic",
+        "when": "editorTextFocus && editorLangId == 'markdown'"
     }
 ]
