@@ -6,8 +6,33 @@ description: Use when an agent needs to run a GPU job (LLM training, inference, 
 # GPU Jobs on Remote Servers
 
 Spin up and monitor GPU jobs (LLM training, inference, eval) on the three GPU
-servers `h82`, `h84`, `h85` from the local machine. SSH is key-based and
-non-interactive: `ssh h82 <cmd>` runs one-shot with no password.
+servers `h82`, `h84`, `h85`. SSH is key-based and non-interactive: `ssh h82
+<cmd>` runs one-shot with no password.
+
+## Am I already on a GPU server? (CHECK FIRST)
+
+Before any `ssh hXX ...` call, check whether you are already running on one of
+the GPU hosts:
+
+```bash
+case "$(hostname -s)" in h82|h84|h85) echo "local=$(hostname -s)";; *) echo "local=mac";; esac
+```
+
+- If `local=mac` → behave as the skill describes: `ssh` to every host, `rsync`
+  code over, etc.
+- If `local=h82|h84|h85` → for THAT host, run commands directly (no `ssh
+  <self>`, no `rsync` — the code is already on the local disk). For the OTHER
+  two hosts, `ssh` as normal. Skip the rsync step entirely when the launching
+  agent is on the same host as the chosen target.
+
+Concrete adjustments when running on a GPU server (call it `$SELF`):
+- `nvidia-smi` scan: still fan out to all three, but use a direct local call
+  for `$SELF` and `ssh` for the others.
+- Code sync: if the target host is `$SELF`, skip rsync. The repo is wherever
+  the user already has it; ask if you don't know the path. If the target is a
+  different host, rsync from `$SELF` to it as normal.
+- `uv sync` / tmux launch / log tail / monitor on `$SELF`: drop the `ssh
+  $SELF` wrapper and run the same `bash -lc '...'` (or plain command) locally.
 
 ## Server Facts
 
