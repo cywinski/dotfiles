@@ -1,17 +1,30 @@
 ---
-name: vllm
-description: Reference for using vLLM. Use when setting up vLLM inference (online or offline), configuring the server, debugging OOM/performance issues, or choosing quantization. Can also be invoked with /vllm.
+name: vllm-reference
+description: vLLM engine reference — offline batch inference (Python API), server flags, LoRA serving, quantization guidance, production deployment, and engine-level troubleshooting/debugging. Use for the `LLM`/`SamplingParams` Python API, `--enable-lora`, quantization choice, OOM/TTFT/throughput diagnosis, or any vLLM usage not covered by the vllm-deploy-* or vllm-bench-* skills. Can also be invoked with /vllm.
 ---
 
-# vLLM Reference
+# vLLM Engine Reference
 
-## Installation
+Reference for vLLM usage NOT covered by the `vllm-deploy-simple`,
+`vllm-deploy-docker`, `vllm-deploy-k8s`, `vllm-bench-serve`,
+`vllm-bench-random-synthetic`, and `vllm-prefix-cache-bench` skills. Those
+skills cover installation, server deployment (bare/Docker/K8s), and
+benchmarking. This skill covers the **offline Python inference API**, **server
+flags reference**, **LoRA serving**, **quantization**, **production tuning**,
+and **engine-level troubleshooting**.
+
+## Installation (uv one-liner)
 
 ```bash
 uv pip install vllm --torch-backend=auto
 ```
 
+For full install/deploy workflows (hardware detection, venv, server start/stop),
+see the `vllm-deploy-simple` skill.
+
 ## Offline Batch Inference
+
+Use the `LLM` class for batch generation without starting a server.
 
 ```python
 from vllm import LLM, SamplingParams
@@ -34,29 +47,13 @@ outputs = llm.chat(messages_list, sampling_params)
 
 Note: by default vLLM applies `generation_config.json` from the HuggingFace repo if it exists. To use vLLM defaults instead: `LLM(model=..., generation_config="vllm")`.
 
-## OpenAI-Compatible Server
+## OpenAI-Compatible Server (beyond deploy-simple)
+
+`vllm-deploy-simple` covers basic `vllm serve` + curl chat test. Additional:
+
+### Text completions endpoint
 
 ```bash
-vllm serve Qwen/Qwen2.5-1.5B-Instruct
-```
-
-Server starts at `http://localhost:8000`. Override with `--host` and `--port`.
-
-### Query with curl
-
-```bash
-# Chat completions
-curl http://localhost:8000/v1/chat/completions \
-    -H "Content-Type: application/json" \
-    -d '{
-        "model": "Qwen/Qwen2.5-1.5B-Instruct",
-        "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Who won the world series in 2020?"}
-        ]
-    }'
-
-# Text completions
 curl http://localhost:8000/v1/completions \
     -H "Content-Type: application/json" \
     -d '{"model": "Qwen/Qwen2.5-1.5B-Instruct", "prompt": "San Francisco is a", "max_tokens": 7}'
@@ -84,6 +81,8 @@ vllm serve MODEL --api-key KEY1 KEY2  # accepts any of the listed keys
 Or set `VLLM_API_KEY` environment variable.
 
 ## Key Server Flags
+
+Consolidated flag reference (deploy skills mention some individually; this is the full set):
 
 | Flag                       | Purpose                                | Example                    |
 | -------------------------- | -------------------------------------- | -------------------------- |
@@ -114,14 +113,8 @@ vllm serve meta-llama/Llama-2-70b-hf \
   --gpu-memory-utilization 0.9
 ```
 
-### Docker
-
-```bash
-docker run --gpus all -p 8000:8000 \
-  vllm/vllm-openai:latest \
-  --model meta-llama/Llama-3-8B-Instruct \
-  --gpu-memory-utilization 0.9
-```
+For Docker deployment, see the `vllm-deploy-docker` skill.
+For Kubernetes deployment, see the `vllm-deploy-k8s` skill.
 
 ## Serving with LoRA
 
@@ -162,8 +155,9 @@ Use the base model name to query without LoRA applied.
 vllm serve TheBloke/Llama-2-70B-AWQ --quantization awq
 ```
 
+## Troubleshooting (engine-level)
 
-## Troubleshooting
+For deployment troubleshooting (Docker, K8s, install), see the `vllm-deploy-*` skills. Below are vLLM engine-level issues.
 
 ### OOM during model loading
 
@@ -192,7 +186,7 @@ KV cache fills up. Reduce `--gpu-memory-utilization`, `--max-num-seqs`, or `max_
 ### Model not found
 
 - Check exact model name/capitalization on HuggingFace
-- For gated models: run `huggingface-cli login` first
+- For gated models: run `hf auth login` first (or `huggingface-cli login` on older versions)
 - For custom models: add `--trust-remote-code`
 
 ### Connection refused
@@ -225,7 +219,7 @@ watch -n 1 nvidia-smi
 curl http://localhost:8000/health
 curl http://localhost:8000/v1/models
 
-# Benchmarking
+# Benchmarking (for full bench workflows, see vllm-bench-serve skill)
 vllm bench throughput --model MODEL --input-tokens 128 --output-tokens 256 --num-prompts 100
 vllm bench latency --model MODEL --input-tokens 128 --output-tokens 256 --batch-size 8
 ```

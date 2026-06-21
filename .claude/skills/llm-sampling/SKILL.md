@@ -7,6 +7,7 @@ description: Use this skill every time when sampling responses (doing the infere
 ## Common Rules
 - When sampling from instruction-tuned models, make sure that a correct chat template is applied. Remember that when sampling locally, you need to do it yourself.
 - Some thinking models (e.g. Qwen3) support also non-reasoning mode. When instructed to sample from the model with thinking disabled, you should provide `enable_thinking=False` to the `tokenizer.apply_chat_template`.
+- By default, when hosting LLMs locally, use `vllm` for efficient sampling. For offline batch inference (Python `LLM`/`SamplingParams` API), look up the `vllm-reference` skill. For serving (online inference via `vllm serve`), look up the `vllm-deploy-simple` skill.
 
 
 ## Default Sampling Parameters
@@ -15,6 +16,20 @@ Always use these parameters unless the user specifies otherwise.
 
 * **Temperature**: 1.0
 * **Max Tokens**: 2000
+
+## Quantization
+
+Unless told otherwise, quantize LLMs when hosting them locally on GPU.
+
+Quantization config:
+```python
+BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True,
+)
+```
 
 
 # OpenRouter API Sampling

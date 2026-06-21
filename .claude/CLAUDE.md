@@ -26,6 +26,9 @@
 - Be concise. Skip boilerplate explanations of things I already know.
 - If unsure between two approaches, present both briefly with tradeoffs — don't just pick one.
 - When debugging: show the hypothesis, the evidence, and the fix. Not just the fix.
+- When I ask for a dashboard, plot, figure, or report, ALWAYS deliver the actual
+  file to me (e.g. Claude Code's SendUserFile) — HTML dashboards, PNG/SVG plots,
+  PDFs, etc. — not just a path or a description. I want to open/view it directly.
 
 ## Environment
 Note: You can check if you are on RunPod by checking if the `RUNPOD_POD_ID` environment variable is set.
