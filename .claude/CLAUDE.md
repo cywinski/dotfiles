@@ -180,7 +180,15 @@ build for that. Concretely:
 - Long jobs print periodic progress (step/sample/ETA), not just start/end.
 
 ### Make data explorable
-- Prefer self-contained single-file HTML dashboards for results (tables +
+- ALWAYS write results to a compact, COMPLETE markdown file alongside any rich
+  output: metric tables, per-condition numbers, key sample text, and findings.
+  Results must NEVER live only inside a huge HTML/base64 dashboard — an agent
+  (you, next session) has to be able to read and grep them cheaply without
+  parsing megabytes of markup. The HTML dashboard is for the human; the
+  markdown is the machine/agent-readable mirror of the same numbers.
+- Reference image/plot files by PATH in the markdown; don't rely on embedded
+  base64 (keep raw PNGs/SVGs in `output/.../plots/` so they can be re-read).
+- Prefer self-contained single-file HTML dashboards for the human (tables +
   plots + sample transcripts), openable in a browser with no server.
 - Keep a Jupyter-style `# %%` inspection script in `notebooks/` that loads the
   latest results and shows summary tables + a few samples for ad-hoc poking.
