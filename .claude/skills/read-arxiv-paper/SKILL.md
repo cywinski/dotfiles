@@ -28,7 +28,11 @@ Extract the contents into:
 Find the main `.tex` file — typically named `main.tex`, but it could be anything. Look for the file that contains `\documentclass` as a reliable signal.
 
 ### Part 5: Read the paper
-Starting from the entrypoint, read the full content of the tex file(s), following any `\input{}` or `\include{}` references to pull in other source files. Read everything up to and including the **Conclusion** section — you can stop before any Appendices, Acknowledgements, or References.
+Starting from the entrypoint, read the full content of the tex file(s), following any `\input{}` or `\include{}` references to pull in other source files.
+
+Read the **whole paper**: abstract, main body, and **all appendices** — appendices routinely carry the ablations, full result tables, prompts, and dataset details that the main body only gestures at, so they are in scope by default. Do not stop at the Conclusion.
+
+Skip only the bibliography/references and the acknowledgements. Never skip an appendix section because it looks long or peripheral; if an appendix lives in a separate `\input{}` file, follow it.
 
 ### Part 6: Inspect key figures
 While reading, note any important figures referenced in the text. Locate the corresponding image files in the unpacked directory (typically `.png`, `.pdf`, or `.eps` files inside a `figures/` or `imgs/` folder) and view them directly to understand what they show.
