@@ -14,7 +14,8 @@ link_source() {
         return
     fi
     if [[ -e "$dst" || -L "$dst" ]]; then
-        backup="$(mktemp -d "${dst}.backup.XXXXXXXX")"
+        mkdir -p "$target_dir/.codex/setup-backups"
+        backup="$(mktemp -d "$target_dir/.codex/setup-backups/$(basename "$dst").XXXXXXXX")"
         mv "$dst" "$backup/original"
         echo "[BACKUP] $dst -> $backup/original"
     fi
