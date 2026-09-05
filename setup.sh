@@ -1,4 +1,6 @@
 #!/bin/bash
+# ABOUTME: Installs Claude Code configuration links from this dotfiles checkout.
+# ABOUTME: Also installs Codex links to the shared instructions and skills.
 
 # Symlink Claude Code configs from this dotfiles repo into ~/.claude/
 # Idempotent — safe to re-run. Works on macOS and Linux.
@@ -50,3 +52,5 @@ done
 
 echo ""
 echo "Claude Code config symlinks are set up."
+
+bash "$DOTFILES_DIR/setup-codex.sh"
