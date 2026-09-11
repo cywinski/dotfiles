@@ -1,0 +1,12 @@
+[
+  {"type":"text","x":0,"y":-60,"text":"Steering-vector eval loop","fontSize":28},
+  {"type":"rectangle","id":"acts","x":0,"y":0,"width":220,"height":80,"backgroundColor":"#e7f5ff","fillStyle":"solid","label":{"text":"residual acts\nlayer 14"}},
+  {"type":"rectangle","id":"sae","x":320,"y":0,"width":220,"height":80,"backgroundColor":"#fff3bf","fillStyle":"solid","label":{"text":"SAE encoder"}},
+  {"type":"diamond","id":"gate","x":320,"y":170,"width":220,"height":120,"backgroundColor":"#ffe3e3","fillStyle":"solid","label":{"text":"feature fires?"}},
+  {"type":"ellipse","id":"steer","x":640,"y":170,"width":220,"height":120,"backgroundColor":"#d3f9d8","fillStyle":"solid","label":{"text":"add steering\nvector"}},
+  {"type":"rectangle","id":"out","x":320,"y":380,"width":220,"height":80,"label":{"text":"baseline output"}},
+  {"type":"arrow","x":230,"y":40,"width":80,"height":0,"start":{"id":"acts"},"end":{"id":"sae"}},
+  {"type":"arrow","x":430,"y":90,"width":0,"height":70,"start":{"id":"sae"},"end":{"id":"gate"}},
+  {"type":"arrow","x":550,"y":230,"width":80,"height":0,"start":{"id":"gate"},"end":{"id":"steer"},"label":{"text":"yes"},"strokeColor":"#2f9e44"},
+  {"type":"arrow","x":430,"y":300,"width":0,"height":70,"start":{"id":"gate"},"end":{"id":"out"},"label":{"text":"no"},"strokeColor":"#e03131"}
+]
