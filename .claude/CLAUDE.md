@@ -17,18 +17,24 @@
 - YAGNI. The best code is no code. Don't add features we don't need right now.
 - When it doesn't conflict with YAGNI, architect for extensibility and flexibility.
 - Fail fast philosophy: NEVER use value placeholders, try except blocks, or any other form of "if this fails, do this".
-- Use assert for `torch` tensor shapes.
-- In `torch` code, avoid for loops and always use vectorized operations if possible.
 - When editing existing code, keep your changes as targeted as possible, avoiding any unnecessary changes. You should optimize for edits that are easy to review.
 - When editing a function with missing docstring, add one.
 
 ## Communication Style
 - Be concise. Skip boilerplate explanations of things I already know.
+- Format outputs so they are easily skimmable: bullets, **bold** key terms, short
+  sections, tables where they help. No walls of text.
+- End EVERY output with a short **TL;DR**: what was just done and why (motivation),
+  any problems encountered, and obvious next steps (if any).
 - If unsure between two approaches, present both briefly with tradeoffs — don't just pick one.
 - When debugging: show the hypothesis, the evidence, and the fix. Not just the fix.
 - When I ask for a dashboard, plot, figure, or report, ALWAYS deliver the actual
   file to me using the current app's attachment or clickable file link — HTML dashboards, PNG/SVG plots,
   PDFs, etc. — not just a path or a description. I want to open/view it directly.
+- HTML dashboards: ALWAYS publish them as Artifacts (in Claude Code, use the Artifact
+  tool) and give me the link, in addition to saving the HTML file under `output/`.
+- When presenting multiple plots, show them ONE BY ONE, each followed by a short
+  description of what it shows and the key takeaway. Never dump all plots at once.
 
 ## Shared Skills and Agent Tools
 - Personal skills live in `~/.claude/skills/`; Codex discovers links to them in
@@ -60,60 +66,6 @@ Note: You can check if you are on RunPod by checking if the `RUNPOD_POD_ID` envi
 - NEVER throw away or rewrite implementations without EXPLICIT permission. If considering this, STOP and ask first.
 - Get approval before implementing ANY backward compatibility.
 - Fix broken things immediately when you find them. Don't ask permission to fix bugs.
-
-### Python Style
-- Formatter: Ruff (line length: 88)
-- Linter: Ruff check
-- Type hints: Use for public APIs
-- Docstrings: Google style
-- Use Fire library instead of argparse
-- All code files MUST start with a brief 2-line comment explaining what the file does. Each line MUST start with "ABOUTME: " to make them easily greppable.
-
-### Code Comments
-
-- Don't add obvious comments for code that is easy to understand.
-- NEVER add comments explaining that something is "improved", "better", "new", "enhanced", or referencing what it used to be.
-- NEVER add instructional comments telling developers what to do ("copy this pattern", "use this instead").
-- Comments should explain WHAT the code does or WHY it exists, not how it's better than something else.
-- If you're refactoring, remove old comments — don't add new ones explaining the refactoring.
-- NEVER remove code comments unless you can PROVE they are actively false. Comments are important documentation and must be preserved.
-- NEVER add comments about what used to be there or how something has changed.
-
-### Jupyter-Style Python Scripts
-
-When the user asks for a "jupyter-style python script", create:
-
-- Simple, minimal Python scripts using `# %%` cell separators for VS Code interactive mode.
-- All global parameters defined as variables at the top for easy modification.
-- Dynamic parameters that I may want to often modify to test things have to be defined right before they are used in the code.
-- No complex abstractions — optimized for hackability and experimentation.
-- NEVER use argparse or Fire in these scripts.
-- Can be run cell-by-cell interactively or as a complete script.
-- Place in the `notebooks/` directory.
-
-#### Example structure
-```python
-# %%
-# Parameters
-model_name = "Qwen/Qwen3-32B"
-max_tokens = 100
-seed = 42
-
-# %%
-# Load data and run experiment
-prompt = ""
-...
-
-# %%
-# Analyze results
-...
-```
-
-## Bash rules
-- NEVER use `python3 -c` or `python -c` with multiline code (even for plotting scripts). Instead, write the code to a .py file and execute it.
-- For one-liners, `python3 -c` is fine.
-- Example: instead of `python3 -c "\nimport json\n..."`, write the script to `script.py` and run `python3 script.py`
-
 
 ## Experiment Workflow
 
@@ -202,8 +154,6 @@ build for that. Concretely:
   base64 (keep raw PNGs/SVGs in `output/.../plots/` so they can be re-read).
 - Prefer self-contained single-file HTML dashboards for the human (tables +
   plots + sample transcripts), openable in a browser with no server.
-- Keep a Jupyter-style `# %%` inspection script in `notebooks/` that loads the
-  latest results and shows summary tables + a few samples for ad-hoc poking.
 - Maintain an append-only, timestamped `LOG.md` (most recent first) where each
   agent logs hypothesis → method → result → next steps.
 
