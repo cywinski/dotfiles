@@ -60,6 +60,21 @@ These hold on top of the non-negotiables, for every figure:
 - **Grid on by default**, behind the data. `use_style()` already sets a light
   y-grid with `axes.axisbelow`; add `ax.grid(axis="x")` only when the reader
   has to read values off the x-axis too.
+- **The legend must not sit on the data.** `ax.legend()` with the default
+  `loc="best"` still lands on bars, lines, or histogram mass whenever the
+  axes are full, which is the usual case for bar charts and overlaid
+  histograms. Check the rendered figure; if the legend covers any mark, move
+  it outside the axes rather than shrinking it: above the plot with
+  `fig.legend(loc="outside upper center", ncol=<n series>)`, or to the right
+  with `fig.legend(loc="outside right upper")`. Use `fig.legend`, not
+  `ax.legend` with `bbox_to_anchor`: `figure()` and `figure_grid()` use
+  constrained layout, which shrinks the axes to fit a figure-level "outside"
+  legend inside the fixed canvas, whereas an axes legend anchored past the
+  axes edge is clipped because `save()` never trims with `bbox_inches`.
+  Direct end-labels (`label_ends()`) or a caption that names the series are
+  also fine. Only leave a legend inside the axes when there is genuinely
+  empty space for it, and then frame it (`frameon=True`) so it does not read
+  as part of the chart.
 - **Deliver the file.** After writing a figure, send it to the user with
   `SendUserFile` — a path in a message is not a delivered figure.
 
