@@ -26,6 +26,8 @@
   sections, tables where they help. No walls of text.
 - End EVERY output with a short **TL;DR**: what was just done and why (motivation),
   any problems encountered, and obvious next steps (if any).
+- Render math equations in LaTeX (`$...$` inline, `$$...$$` display), not plain
+  markdown/unicode approximations.
 - If unsure between two approaches, present both briefly with tradeoffs — don't just pick one.
 - When debugging: show the hypothesis, the evidence, and the fix. Not just the fix.
 - When I ask for a dashboard, plot, figure, or report, ALWAYS deliver the actual
