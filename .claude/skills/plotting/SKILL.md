@@ -1,6 +1,6 @@
 ---
 name: plotting
-description: "Use this skill every time when plotting data or writing plotting scripts. Publication-quality figures in matplotlib or TikZ: learning curves, scaling laws, benchmark and ablation comparisons, Pareto trade-offs, heatmaps and confusion matrices, method diagrams. Covers the shared style module, sizing, uncertainty, and vector export. Use whenever you plot, chart, or visualize results, add a figure to a paper or report, or one looks unpolished; then read one reference."
+description: "Use this skill every time when plotting data or writing plotting scripts. Publication-quality figures in matplotlib or TikZ: learning curves, scaling laws, benchmark and ablation comparisons, Pareto trade-offs, heatmaps and confusion matrices, calibration/reliability diagrams, Figure-1 teasers, method diagrams. Covers choosing the claim and the plot shape that says it, the shared style module, sizing, uncertainty, and vector export. Use whenever you plot, chart, or visualize results, add a figure to a paper or report, or one looks unpolished; then read one reference."
 ---
 
 A figure in a paper is an argument, not a screenshot of an array. It makes one
@@ -10,7 +10,50 @@ titled where a caption belongs, colored from a cycle that collapses in
 greyscale, and rasterized where the document wants vector.
 
 Everything below is what separates a figure that survives review from one that
-gets remade the week before the deadline.
+gets remade the week before the deadline. It is worth the time: a reader skims
+the title, the abstract, and then the figures, so for most readers the figures
+*are* the result.
+
+## Decide the claim before you plot
+
+Most unreadable figures are decided before the first line of plotting code:
+the figure tries to say two things, or says its one thing in a shape the reader
+has to decode.
+
+- **Sketch the figure before the experiment runs.** Say, in a sentence, what
+  the figure should show if the hypothesis holds: which axis, which conditions,
+  where each line or bar should land. That sketch is the prediction. It also
+  tells you which runs the figure needs and which it does not. When the real
+  figure disagrees with it, that is a finding about the hypothesis, not a
+  plotting problem: say so, and revise the hypothesis before the figure.
+- **Use a shape the reader already knows.** "Simple" means simple relative
+  to what the field already recognizes. To an ML reader a reliability diagram
+  is simple, and a novel glyph is not. Each familiar shape carries a sentence
+  the reader decodes before reading the caption: bars say "A is higher than
+  B", diverging lines say "this one goes up, that one doesn't", a log-log line
+  says "the trend is linear in log space", a frontier says "we push the
+  trade-off". Pick the shape whose sentence *is* your claim (the table in
+  *Read exactly one reference* pairs each with its reference). If no shape's
+  sentence fits, the claim is usually not sharp yet. Fix the claim before you
+  invent a new kind of chart.
+- **One idea per plot.** Every mark answers the figure's one question. An
+  element that answers a different question (a pass@k series on a
+  single-attempt figure, a baseline the text never discusses) belongs in
+  another figure or the appendix.
+- **The axis of variation is the comparison.** Put the things the claim
+  compares next to each other: adjacent bars, a shared x-axis, the same row of
+  panels with tight gaps. If the claim is about where conditions end up, a
+  grouped bar of final values beats ten overlapping training curves. Spacing
+  groups, too: panels close together invite comparison, and a wider gap
+  separates.
+- **Rank what the eye sees first.** Give the marks the claim is about full
+  saturation, the thicker line, and the larger marker. Supporting context
+  (baselines, other runs, raw points under a fit) stays visible but thinner,
+  lighter, or grey. Choose deliberately: enlarged points pull attention to the
+  data, and a heavier fitted line pulls it to the trend.
+- **Draw a diagram when a chart is the wrong tool.** A branching process, a
+  pipeline, or a mechanism is clearer drawn than plotted
+  ([references/diagram.md](references/diagram.md)).
 
 ## Non-negotiables
 
@@ -36,6 +79,14 @@ gets remade the week before the deadline.
    Plot the interval across seeds (`band()`, i.e. `fill_between`; error bars
    only where a band makes no sense) and state the seed count in the caption;
    if you only have one run, say "single seed" rather than implying more.
+   **Say what the interval is over.** An interval across 100 samples of one
+   task measures sampling noise on that task. It says nothing about whether
+   the number holds on the next task. Resample over the unit the claim
+   generalizes over (seeds, tasks, prompts, environments), name that unit in
+   the caption, and name the uncertainty the bars cannot cover, such as a
+   single environment or a single model family. A rate over n binary
+   outcomes gets a `binomial_ci()` (Wilson) interval, not `mean_ci()` over
+   0/1 values, which collapses to a point at 0% or 100%.
 6. **Label the axes with units.** "Loss" is a label; "step" without knowing
    whether it counts optimizer steps or tokens is not.
 7. **Colorblind-safe, greyscale-safe.** Use the module's palette. Never `jet`,
@@ -57,6 +108,15 @@ These hold on top of the non-negotiables, for every figure:
 - **Edges on filled elements**: `edgecolor="black"`, `linewidth=0.4-0.8` on
   bars, scatter markers, and patches. A fill without an edge loses its
   boundary in greyscale and against a grid.
+- **One color per condition, across every figure.** Fix the
+  condition-to-color mapping once per project (a `COLORS` dict beside the
+  vendored `figstyle.py`, imported by every figure script) and never let
+  the color cycle assign it. A reader who learned "red is ours" in Figure 1
+  should not have to relearn it in Figure 4. Baselines stay grey, and variants
+  of one method share a hue in shades (`family()`).
+- **Literal text is monospace**: prompts, tokens, code, and model outputs
+  quoted in a figure (`fontfamily="monospace"`), so they read as data rather
+  than as labels.
 - **Grid on by default**, behind the data. `use_style()` already sets a light
   y-grid with `axes.axisbelow`; add `ax.grid(axis="x")` only when the reader
   has to read values off the x-axis too.
@@ -171,6 +231,15 @@ seeds, bands are 95\% intervals. The dotted line is the pretrained model.}
 A one-panel figure earns roughly 25-40 words; a multi-panel figure earns more,
 and each panel needs its own clause.
 
+**A figure in a research update carries more.** In an experiment report, a
+chat answer, or a Slack thread, the reader knows the project but not this
+run. Their job is to catch a mistake before it compounds. Lead with the same
+bold claim, then give everything they need to check it: the data and the
+split, n and the unit of n, how the interval was computed, the key
+hyperparameters, and every non-obvious choice (a filter, an excluded run, a
+changed prompt). Length is fine here: a paragraph a reviewer can audit beats
+a sentence they have to ask about.
+
 ## Multi-panel figures
 
 Roughly a quarter of figures in current ML papers are multi-panel — `(a)`/`(b)`
@@ -198,15 +267,19 @@ sizes the whole grid to the final printed width.
 ## Read exactly one reference
 
 Pick by the question the figure answers, not by the shape you have in mind.
+The middle column is the sentence the shape says before anyone reads the
+caption. If it is not your claim, you have the wrong row.
 
-| The figure answers | Read |
-| --- | --- |
-| How does a metric move over training, and is the gap bigger than seed noise? | [references/curves.md](references/curves.md) |
-| How does performance change with scale, and what does the trend predict? | [references/scaling.md](references/scaling.md) |
-| Which method wins across benchmarks, or which ablated component mattered? | [references/comparison.md](references/comparison.md) |
-| What is traded off against what — reward vs KL, quality vs cost or latency? | [references/pareto.md](references/pareto.md) |
-| What does this 2D grid, confusion matrix, or sweep look like? | [references/matrix.md](references/matrix.md) |
-| What is the method, architecture, or pipeline? | [references/diagram.md](references/diagram.md) |
+| The figure answers | The shape says | Read |
+| --- | --- | --- |
+| How does a metric move over training, and is the gap bigger than seed noise? | "this goes up" / "this one goes up, that one doesn't" | [references/curves.md](references/curves.md) |
+| How does performance change with scale, and what does the trend predict? | "the trend is linear in log space" | [references/scaling.md](references/scaling.md) |
+| Which method wins across benchmarks, or which ablated component mattered? | "A is higher than B" / "removing X costs this much" | [references/comparison.md](references/comparison.md) |
+| What is traded off against what — reward vs KL, quality vs cost or latency? | "we push the frontier" | [references/pareto.md](references/pareto.md) |
+| What does this 2D grid, confusion matrix, or sweep look like? | "the effect lives in this region" | [references/matrix.md](references/matrix.md) |
+| Can a model's stated probabilities be taken at face value? | "A is better calibrated than B" | [references/calibration.md](references/calibration.md) |
+| What is the paper's one phenomenon (Figure 1, the teaser)? | "here is the idea, and here it is happening" | [references/teaser.md](references/teaser.md) |
+| What is the method, architecture, or pipeline? | (a diagram, not a chart) | [references/diagram.md](references/diagram.md) |
 
 Every reference's template writes to `figs/`, which is the paper destination.
 For an experiment or a chat answer, put both the script and its `save()` stem
@@ -214,7 +287,7 @@ under the run's `plots/` directory instead — they stay together either way.
 
 Do not read references for figures you are not making.
 
-Anything genuinely outside those six — a photograph, a qualitative sample
+Anything genuinely outside those eight — a photograph, a qualitative sample
 grid, a map — still obeys the non-negotiables above and the style module.
 
 ## Before you hand it over
@@ -233,8 +306,12 @@ grid, a map — still obeys the non-negotiables above and the style module.
 - Open the PDF and read it at printed size. If a tick label is unreadable on
   screen at 100%, it is unreadable on paper.
 - Every axis labelled, with units. No stray `ax.set_title`.
-- The claim in the caption is visible in the figure without the prose.
-- Uncertainty shown, with n stated.
+- The claim in the caption is visible in the figure without the prose, and it
+  is the sentence the figure's shape says.
+- If you sketched a prediction, compare the result with it, and report a
+  mismatch as a result rather than smoothing it over.
+- Uncertainty shown, with n and the unit of n stated.
+- Each condition has the color it has in the project's other figures.
 - No unexplained series, no legend entry for something that was cut.
 - The script reruns from scratch and reproduces the same file.
 - Send the file to the user (`SendUserFile`), not just its path.

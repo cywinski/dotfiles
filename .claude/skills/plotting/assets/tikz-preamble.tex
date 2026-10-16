@@ -10,6 +10,11 @@
 \documentclass[border=2pt]{standalone}
 \usepackage{tikz}
 \usepackage{amsmath}
+% Helvetica (Nimbus Sans) for \sffamily, the face use_style() resolves to, so a
+% diagram stacked next to a plot does not switch to Computer Modern Sans at
+% the seam. Unscaled, so \footnotesize here is the plots' 8pt. This stays in
+% the standalone head: it is not one of the blocks that travel into a paper.
+\usepackage{helvet}
 \usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc, shapes.geometric}
 
 % Diagram text is sans, matching the matplotlib figures next to it — figure

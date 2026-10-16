@@ -49,6 +49,23 @@ is a transformation of the evidence:
 - Never smooth an evaluation metric that is already sparse — you are inventing
   points between real measurements.
 
+## Diverging lines: "this one goes up, that one doesn't"
+
+The commonest curve claim compares a treatment with a control that shares its
+starting point. The shape says it on its own if the figure keeps the shared
+start visible:
+
+- **Start both lines at the same x and plot step 0.** The common origin is
+  half the argument. Without it, the reader cannot tell divergence from an
+  offset that was there all along.
+- **Control in grey, treatment in color.** The flat line is context, and the
+  rising one is the claim.
+- **Do not normalize each line to its own start**, or the control's flatness
+  becomes an artifact of the normalization. Plot raw values on a shared axis.
+- If the claim is only about where the lines end, the endpoint gap may be
+  better as a bar of final values ([comparison.md](comparison.md)). Keep the
+  curve when *when* they diverge matters.
+
 ## Traps
 
 | Trap | Fix |

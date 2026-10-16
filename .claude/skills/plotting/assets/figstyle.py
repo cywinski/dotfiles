@@ -381,6 +381,28 @@ def mean_ci(runs, confidence: float = 0.95):
     return mean, mean - crit * sem, mean + crit * sem
 
 
+def binomial_ci(successes, trials):
+    """Rate and 95% Wilson interval for `successes` out of `trials`.
+
+    Returns `(rate, lo, hi)`, elementwise. Use it for any rate over binary
+    outcomes: accuracy on n items, a monitor's catch rate, a calibration bin.
+    The normal-approximation interval collapses to a point at 0% and 100% and
+    runs past [0, 1] near them, which is exactly where small-n rates live.
+    """
+    k = np.asarray(successes, dtype=float)
+    n = np.asarray(trials, dtype=float)
+    if np.any(n <= 0):
+        raise ValueError("every rate needs at least one trial")
+    if np.any((k < 0) | (k > n)):
+        raise ValueError("successes must lie in [0, trials]")
+    z = 1.959964
+    rate = k / n
+    denom = 1 + z**2 / n
+    center = (rate + z**2 / (2 * n)) / denom
+    half = z * np.sqrt(rate * (1 - rate) / n + z**2 / (4 * n**2)) / denom
+    return rate, center - half, center + half
+
+
 def family(name: str, n: int, lightest: float = 0.55) -> list[str]:
     """`n` shades of one palette color, lightest first.
 
