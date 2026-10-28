@@ -122,7 +122,7 @@ def main():
                        xticks=ticks, end_labels=False, legend=True, xlabel="Stated confidence (%)",
                        ylabel="Accuracy", title=TITLE)
     spread = viz.histogram({m: [100 * v for v in prob[m]] for m in prob}, roles=ROLES, bins=BINS,
-                           stat="percent", domain=(0, 100), ticks=ticks, height=110,
+                           stat="percent", domain=(0, 100), ticks=ticks, height=150, legend=False,
                            xlabel="Stated confidence (%)", ylabel="Answers")
     fig = viz.panels([diagram, spread], cols=1)
     fig.save("figs/calibration.pdf")

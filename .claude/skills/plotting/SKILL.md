@@ -24,9 +24,13 @@ short script in `examples/NN_name.py` with its figure in
 uv run --with-editable "$(viz path)" python figs/make_figs.py
 ```
 
-If `viz` is not found, the dotfiles `setup.sh` installs it (it clones
-safety-research/viz beside the dotfiles and runs its `install.sh`). To render
-a JSON spec instead of Python: `viz render spec.json -o fig.png`.
+If `viz` is not found, run the dotfiles `setup.sh`: it clones
+safety-research/viz beside the dotfiles (or updates the clone), installs the
+`viz` command from it with `uv tool install --editable`, and installs the
+headless Chromium that renders PNG and PDF. A script that needs nothing but
+viz can also run as `viz run figs/make_figs.py`; the templates here also need
+numpy, hence the `uv run` line above. To render a JSON spec instead of Python:
+`viz render spec.json -o fig.png`.
 
 ```python
 import viz
@@ -107,7 +111,7 @@ answers; copy the closest one.
   model: `scatter`, with `frontier="upper-left"` for a trade-off frontier.
   Scaling: `line(..., xscale="log", yscale="log")`.
 - **Monitors and probes.** ROC curves: `line(..., diagonal="Chance")`. Scores
-  on two classes: `histogram`. A 2×2 confusion matrix: `tiles`. Probe accuracy
+  on two classes: `histogram`. A confusion matrix: `heatmap`. Probe accuracy
   by layer: `line` with a `ref=` line at chance.
 - **Interpretability.** Activations in 2D: `scatter` with groups. A score on
   every token: `tokens`. Steering strength: `line(..., xscale="category")`.

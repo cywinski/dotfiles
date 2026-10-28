@@ -23,12 +23,14 @@ symmetric (a confusion or correlation matrix at any size).
 | A signed difference, correlation, or delta to a baseline | `scale="diverging", center=0` with a symmetric `domain=` | The midpoint color must land on zero, or the sign is unreadable. Pass `low="blue", high="coral"` when higher is worse |
 | Anything at all | Never `jet`, `rainbow`, `hsv` (in a fallback figure) | They have bright bands at arbitrary values, inventing edges the data does not have |
 
-## Every cell carries its value
+## The color bar is an axis
 
-viz writes each cell's value on it, in white or ink by contrast, so the color
-shows the pattern and the number gives the reading. Name the quantity and unit
-in the title or caption, as you would an axis. Several heatmaps on one scale
-share the same `domain=`, or a reader compares colors that are not
+Label it with the quantity and its units (`label=`), exactly as you would
+label an x-axis; viz writes each cell's value on it too. Its range is a
+decision: by default it runs from 0 (0-100 for percents), which washes out a
+grid whose values all sit far from zero, such as a loss between 2.0 and 2.9.
+Pass `domain=(lo, hi)` for the measured range, and say so. Several heatmaps on
+one scale share the same `domain=`, or a reader compares colors that are not
 comparable.
 
 ## Confusion matrices
@@ -41,8 +43,8 @@ comparable.
 - **Order the classes meaningfully** — by frequency, by semantic grouping, or
   identically to a matrix you are comparing against. Alphabetical order
   scatters the block structure that is often the finding.
-- **A 2×2 matrix is four numbers**, such as a monitor's catches and misses:
-  `viz.tiles` with big numbers reads better than a heatmap.
+- **Keep classes in one order on both axes**, so the diagonal is the correct
+  predictions.
 
 ## Traps
 
@@ -84,7 +86,10 @@ def main():
     # which viz leaves blank instead of shading it as the lowest value.
     data = {f"lr {lr:.0e}": [loss.get((lr, bs)) for bs in sizes] for lr in lrs}
     cols = [str(bs) for bs in sizes]
-    fig = viz.heatmap(data, cols=cols, col_groups=[("Batch size", cols)], unit="", decimals=2, title=TITLE)
+    # The color bar starts at 0 unless told otherwise; span the measured range so the pattern shows.
+    measured = [v for v in loss.values() if v is not None]
+    fig = viz.heatmap(data, cols=cols, col_groups=[("Batch size", cols)], unit="", decimals=2,
+                      domain=(min(measured), max(measured)), label="Validation loss", title=TITLE)
     fig.save("figs/sweep.pdf")
     fig.save("figs/sweep.png")
 
@@ -124,7 +129,8 @@ def main():
     support = {t: sum(counts[(t, p)] for p in CLASSES) for t in CLASSES}
     # Row-normalized: each cell is the % of that true class, so the diagonal is per-class recall.
     data = {f"True {t} (n={support[t]})": [100 * counts[(t, p)] / support[t] for p in CLASSES] for t in CLASSES}
-    fig = viz.heatmap(data, cols=CLASSES, col_groups=[("Predicted", CLASSES)], decimals=0, title=TITLE)
+    fig = viz.heatmap(data, cols=CLASSES, col_groups=[("Predicted", CLASSES)], decimals=0,
+                      label="Share of the true class", title=TITLE)
     fig.save("figs/confusion.pdf")
     fig.save("figs/confusion.png")
 
@@ -141,7 +147,7 @@ three thousand.
 
 - [ ] The grid is big enough that a heatmap beats a line plot.
 - [ ] One-hue scale for magnitudes, diverging *centered on zero* for signed data.
-- [ ] Quantity and unit named; heatmaps on one scale share `domain=`.
+- [ ] Color bar labelled with quantity and units; its `domain=` chosen, and shared across heatmaps on one scale.
 - [ ] Axis ticks show real values, not indices.
 - [ ] Confusion matrix: normalization named in the caption, support reported.
 - [ ] Failed or missing runs are visually distinct from bad-but-real values.

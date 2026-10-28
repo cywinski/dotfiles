@@ -4,6 +4,12 @@ Run `bash setup.sh` to install Claude Code settings and shared Codex guidance.
 Run `bash setup-codex.sh` to install only Codex's instruction and skill links.
 Both scripts preserve replaced files as backups.
 
+`setup.sh` also installs [viz](https://github.com/safety-research/viz), the
+figure library the `plotting` skill uses: it clones (or fast-forwards) it
+beside this checkout (`VIZ_DIR` overrides the path), installs the `viz` command
+from the clone with `uv tool install --editable`, and installs the headless
+Chromium viz renders with. It needs `uv`.
+
 | Edit here | Claude Code reads | Codex reads |
 | --- | --- | --- |
 | `.claude/CLAUDE.md` | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` |
