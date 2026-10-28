@@ -35,9 +35,10 @@ serve it.
   figure. A reader learns the mapping once.
 
 The concept is a schematic, so it is TikZ ([diagram.md](diagram.md)); the
-results are data, so they are matplotlib. They meet in one `figure*`: the
-diagram at its natural width, and the results strip built at `WIDE`. Both use
-the same sans face and the same Okabe-Ito values, so the seam does not show.
+results are data, so they are viz. They meet in one `figure*`: the diagram at
+its natural width, and the results strip built at `size="paper"`. Both use the
+viz palette, and with `viz.set_defaults(font="sans")` both are sans, so the
+seam does not show.
 
 ## Traps
 
@@ -52,7 +53,7 @@ the same sans face and the same Okabe-Ito values, so the seam does not show.
 
 ## Template
 
-Three pieces: the concept in TikZ, the results in matplotlib, and the
+Three pieces: the concept in TikZ, the results in viz, and the
 `figure*` that stacks them. The placeholder labels are the parts to rewrite.
 
 `figs/teaser_concept.tex`: the contents of `tikz-preamble.tex`, then:
@@ -73,7 +74,7 @@ Three pieces: the concept in TikZ, the results in matplotlib, and the
 
   \draw[flow] (base.east) -- (treat.west);
   \draw[flow] (base.east) -- (ctrl.west);
-  \draw[flow, draw=figblue] (treat) -- (up);
+  \draw[flow, draw=figorange] (treat) -- (up);
   \draw[flow] (ctrl) -- (flat);
 
   % Literal model output is monospace, so it reads as data, not as a label.
@@ -92,85 +93,58 @@ Three pieces: the concept in TikZ, the results in matplotlib, and the
 (`condition,eval,seed,value`):
 
 ```python
-"""Figure 1 results strip: the effect over training, and on held-out evals. Regenerate: python figs/teaser_results.py"""
+"""Figure 1 results strip: the effect over training, and where it lands.
+
+Regenerate: uv run --with-editable "$(viz path)" --with numpy python figs/teaser_results.py
+"""
 
 import csv
 from collections import defaultdict
 
 import numpy as np
-from figstyle import BASELINE, PALETTE, WIDE, band, figure_grid, label_ends, mean_ci, panel_labels, save, use_style
+import viz
+from figstats import mean_ci
 
-CURVES = "figs/teaser_curves.csv"
-EVALS = "figs/teaser_evals.csv"
-
-# The mapping the concept panel introduced, used unchanged in every figure.
-# In a project this lives in figs/colors.py.
-COLORS = {"Intervention": PALETTE["blue"], "Control": BASELINE}
-
-
-def load_curves(path):
-    """-> {condition: (steps, runs)} with runs shaped (n_seeds, n_steps)."""
-    raw = defaultdict(lambda: defaultdict(list))
-    with open(path) as handle:
-        for row in csv.DictReader(handle):
-            raw[row["condition"]][row["seed"]].append((float(row["step"]), float(row["value"])))
-    series = {}
-    for condition, seeds in raw.items():
-        curves = [sorted(points) for points in seeds.values()]
-        steps = [step for step, _ in curves[0]]
-        # Ragged seed grids need curves.md's interpolating loader; fail loudly
-        # rather than averaging misaligned steps.
-        if any([step for step, _ in curve] != steps for curve in curves):
-            raise ValueError(f"{condition}: seeds log on different steps — use the curves.md loader")
-        series[condition] = (np.array(steps), np.array([[v for _, v in curve] for curve in curves]))
-    return series
-
-
-def load_evals(path):
-    """-> {condition: {eval: per-seed values}}, evals in file order."""
-    scores = defaultdict(lambda: defaultdict(list))
-    with open(path) as handle:
-        for row in csv.DictReader(handle):
-            scores[row["condition"]][row["eval"]].append(float(row["value"]))
-    return scores
+CURVES = "figs/teaser_curves.csv"  # condition,seed,step,value
+EVALS = "figs/teaser_evals.csv"  # condition,eval,seed,value
+CONDITIONS = ["Control", "Intervention"]
+EVAL_ORDER = ["Held-out tasks", "New domain"]
+# The same condition colors as the concept panel and every later figure.
+ROLES = {"baseline": "Control", "intervention": "Intervention"}  # or viz-roles.json
 
 
 def main():
-    use_style()
-    curves = load_curves(CURVES)
-    evals = load_evals(EVALS)
+    viz.set_defaults(size="paper")
+    viz.set_roles(**ROLES)  # before the panels are built: each chart takes its colors when it is made
+    runs = defaultdict(lambda: defaultdict(list))
+    with open(CURVES) as handle:
+        for row in csv.DictReader(handle):
+            runs[row["condition"]][row["seed"]].append((float(row["step"]), float(row["value"])))
+    lines, bands = {}, {}
+    for c in CONDITIONS:
+        curves = [sorted(points) for points in runs[c].values()]
+        steps = [s for s, _ in curves[0]]
+        mean, lo, hi = mean_ci(np.array([[v for _, v in curve] for curve in curves]))
+        lines[c] = list(zip(steps, mean.tolist()))
+        bands[c] = (lo.tolist(), hi.tolist())
 
-    # One quantity in both panels, so one y-axis and one label.
-    fig, (ax_curve, ax_bars) = figure_grid(1, 2, width=WIDE, ratio=0.27, sharey=True)
+    scores = defaultdict(lambda: defaultdict(list))
+    with open(EVALS) as handle:
+        for row in csv.DictReader(handle):
+            scores[row["eval"]][row["condition"]].append(float(row["value"]))
+    bars = {e: [float(np.mean(scores[e][c])) for c in CONDITIONS] for e in EVAL_ORDER}
+    seeds = {e: [scores[e][c] for c in CONDITIONS] for e in EVAL_ORDER}  # every seed as a dot over its bar
 
-    # (b) Diverging lines from a shared start: the intervention rises, control stays flat.
-    lines = [band(ax_curve, *curves[c], color=COLORS[c]) for c in COLORS]
-    ax_curve.set_xlabel("Training step")
-    ax_curve.set_ylabel("Target behaviour rate (%)")
-    ax_curve.set_ylim(0, 100)
-    last_step = max(steps[-1] for steps, _ in curves.values())
-    label_ends(ax_curve, lines, list(COLORS))
-    # label_ends widens the x-range for its labels; no tick should promise data there.
-    ax_curve.set_xticks([t for t in ax_curve.get_xticks() if 0 <= t <= last_step])
-
-    # (c) The same effect on held-out evals: "A is higher than B", bars from zero.
-    names = list(next(iter(evals.values())))
-    x = np.arange(len(names))
-    width = 0.8 / len(COLORS)
-    for i, condition in enumerate(COLORS):
-        runs = np.array([evals[condition][name] for name in names]).T  # (n_seeds, n_evals)
-        mean, lo, hi = mean_ci(runs)
-        ax_bars.bar(
-            x + (i - (len(COLORS) - 1) / 2) * width, mean, width,
-            yerr=np.stack([mean - lo, hi - mean]), color=COLORS[condition],
-            edgecolor="black", linewidth=0.4, error_kw={"elinewidth": 0.6, "capsize": 1.5},
-        )
-    ax_bars.set_xticks(x, names)
-    ax_bars.tick_params(axis="x", length=0)
-
-    # No legend: (b) labels the lines directly, and (c) reuses its colors.
-    panel_labels([ax_curve, ax_bars], labels=["(b)", "(c)"])
-    save(fig, "figs/teaser_results")
+    fig = viz.panels([
+        # viz labels every x value when there are few; thin the ticks so they don't collide.
+        viz.line(lines, bands=bands, markers=False, end_values=False, xticks=steps[::max(1, len(steps) // 4)],
+                 xlabel="Training step",
+                 ylabel="Behavior rate", title="(b) Over training"),
+        viz.bars(bars, series=CONDITIONS, runs=seeds, sort=False, decimals=1, ylabel="Behavior rate",
+                 title="(c) After training"),
+    ], cols=2)
+    fig.save("figs/teaser_results.pdf")
+    fig.save("figs/teaser_results.png")
 
 
 if __name__ == "__main__":
@@ -178,8 +152,8 @@ if __name__ == "__main__":
 ```
 
 The paper stacks them. The diagram goes in at its natural width, never
-rescaled, and the results strip at `\linewidth`, which is the `WIDE` it was
-built at:
+rescaled, and the results strip at `\linewidth`, which is the `paper` width it
+was built at:
 
 ```latex
 \begin{figure*}[t]
@@ -201,5 +175,5 @@ built at:
 - [ ] A concept panel on top shows the idea; the results beneath show it happening.
 - [ ] One or two headline results, in shapes the reader already knows.
 - [ ] The accented condition has the same color in the diagram, the results, and every later figure.
-- [ ] The diagram is included at natural width and the results strip was built at `WIDE`, with neither rescaled.
+- [ ] The diagram is included at natural width and the results strip was built at `size="paper"`, with neither rescaled.
 - [ ] Literal model text is monospace.

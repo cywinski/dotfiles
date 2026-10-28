@@ -6,7 +6,7 @@ contribution sits in it.
 Draw schematics in TikZ. It is vector, its text is set by the same engine as
 the paper, it diffs in git, and a reviewer's "move the loss term" is a one-line
 edit rather than a redraw. Keep the division clean: **TikZ for schematics,
-matplotlib for data.** A bar chart in pgfplots is a second plotting stack to
+viz for data.** A bar chart in pgfplots is a second plotting stack to
 maintain for no gain.
 
 Whatever draws it, the diagram must be genuinely vector (a PDF, not a PNG of a

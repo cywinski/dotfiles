@@ -27,8 +27,8 @@ is not faster, and a steps-axis figure hides exactly that.
 ## Aggregate seeds, never pick one
 
 Run at least 3 seeds — 5 if the effect is small. Plot the mean as the line and
-the 95% interval as a band in the same color at low alpha (`band()` in the
-style module). State n in the caption.
+the 95% interval as a band in the same color (`mean_ci()` from `figstats.py`
+into viz's `bands=`), or every seed as a faint line under the mean (`runs=`). State n in the caption.
 
 - A band of ±1 standard deviation answers "how spread are the seeds", not "how
   well is the mean resolved". Use the interval.
@@ -44,7 +44,8 @@ Training loss is noisy and an unsmoothed curve can be unreadable, but smoothing
 is a transformation of the evidence:
 
 - State the smoothing in the caption ("EMA, α=0.1"), always.
-- Draw the raw series faintly underneath the smoothed line. A smoothed line
+- Draw the raw series faintly underneath the smoothed line (viz's `smooth=`
+  does both). A smoothed line
   alone lets a reader believe the run was that stable.
 - Never smooth an evaluation metric that is already sparse — you are inventing
   points between real measurements.
@@ -72,26 +73,32 @@ start visible:
 | --- | --- |
 | Y-axis truncated so a small gap looks decisive | Include the range that matters; if you zoom, say so in the caption |
 | Log-scale axis without saying so | Say so on the label. Use log-y when the metric spans more than an order of magnitude or the claim is about a ratio; a bounded loss that moves from 4.7 to 1.6 reads better linear |
-| Legend covering the region of interest | Direct-label the lines at their right end (`label_ends`); a legend is a lookup table |
+| Legend covering the region of interest | Name the lines at their right end (viz's default); a legend is a lookup table |
 | Too many curves in one panel | Show the 4 that carry the claim; the rest belong in an appendix table |
-| The baseline drawn in a palette color | Baselines and chance level are grey (`BASELINE`) — color is for the things being compared |
+| The baseline drawn in a palette color | The baseline takes the control role (gray) and chance is a `ref=` line — color is for the things being compared |
 | Curves cut at different x extents without comment | Say why one stopped early (diverged, out of budget) |
 
 ## Template
 
-`figs/loss_curve.py`, reading a tidy CSV or JSON exported from a run under `output/`
-(`variant,seed,step,value`):
+`figs/loss_curve.py`, reading a tidy CSV exported from a run under `output/`
+(`variant,seed,step,value`). Run it with `uv run --with-editable "$(viz path)" --with numpy python figs/loss_curve.py`, with `figstats.py` vendored in `figs/`.
 
 ```python
-"""Validation loss over training. Regenerate: python figs/loss_curve.py"""
+"""Validation loss over training.
+
+Regenerate: uv run --with-editable "$(viz path)" --with numpy python figs/loss_curve.py
+"""
 
 import csv
 from collections import defaultdict
 
 import numpy as np
-from figstyle import BASELINE, COLUMN, band, figure, label_ends, save, si_ticks, use_style
+import viz
+from figstats import mean_ci
 
 DATA = "figs/loss_curve.csv"
+ROLES = {"baseline": "Baseline", "intervention": "Ours"}  # or the write-up's viz-roles.json
+TITLE = None  # paper: the caption carries the claim. Report or chat: the finding, as a sentence.
 
 
 def load(path):
@@ -122,27 +129,28 @@ def load(path):
 
 
 def main():
-    use_style()
-    series = load(DATA)
+    viz.set_defaults(size="column")
+    lines, bands = {}, {}
+    for variant, (steps, runs) in load(DATA).items():
+        mean, lo, hi = mean_ci(runs)
+        print(f"{variant}: n={runs.shape[0]} seeds, final {mean[-1]:.3f} [{lo[-1]:.3f}, {hi[-1]:.3f}]")
+        tokens = steps / 1e9  # ticks of 100,000,000 collide at column width: rescale the unit
+        lines[variant] = list(zip(tokens.tolist(), mean.tolist()))
+        bands[variant] = (lo.tolist(), hi.tolist())
 
-    fig, ax = figure(width=COLUMN, ratio=0.72)
-    lines, labels = [], []
-    for variant, (steps, runs) in series.items():
-        color = BASELINE if variant == "baseline" else None
-        lines.append(band(ax, steps, runs, color=color))
-        labels.append(f"{variant} (n={runs.shape[0]})")
-
-    ax.set_xlabel("Tokens seen")
-    ax.set_ylabel("Validation loss")
-    label_ends(ax, lines, labels)
-    si_ticks(ax, "x")  # after label_ends, which moves the right limit
-
-    save(fig, "figs/loss_curve")
+    fig = viz.line(lines, bands=bands, roles=ROLES, unit="", markers=False,
+                   xlabel="Tokens seen (billions)", ylabel="Validation loss", title=TITLE)
+    fig.save("figs/loss_curve.pdf")
+    fig.save("figs/loss_curve.png")  # to look at before sending
 
 
 if __name__ == "__main__":
     main()
 ```
+
+To show every seed instead of a band, pass the per-seed values as
+`runs={variant: [[...], ...]}` with a shared `x=`; that is the better choice
+when seeds disagree qualitatively.
 
 ## Checklist
 

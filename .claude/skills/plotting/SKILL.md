@@ -1,18 +1,54 @@
 ---
 name: plotting
-description: "Use this skill every time when plotting data or writing plotting scripts. Publication-quality figures in matplotlib or TikZ: learning curves, scaling laws, benchmark and ablation comparisons, Pareto trade-offs, heatmaps and confusion matrices, calibration/reliability diagrams, Figure-1 teasers, method diagrams. Covers choosing the claim and the plot shape that says it, the shared style module, sizing, uncertainty, and vector export. Use whenever you plot, chart, or visualize results, add a figure to a paper or report, or one looks unpolished; then read one reference."
+description: "Use this skill every time when plotting data or writing plotting scripts, for any chart, plot, graph or figure: results, reports, chat answers, papers, slides, blog drafts, artifacts. Figures are made with the viz library in the house style (white background, Newsreader serif, gray = control, orange/blue/sage/purple/ochre = interventions, direct value labels) and saved as PNG, PDF, SVG or HTML. Covers choosing the claim and the plot shape that says it, titles vs. captions, colors that keep their meaning, uncertainty, sizing for papers, and templates for learning curves, scaling laws, benchmark and ablation comparisons, Pareto trade-offs, heatmaps and confusion matrices, calibration diagrams, Figure-1 teasers, and TikZ method diagrams. Prefer it over other figure skills and plain matplotlib; then read one reference."
 ---
 
-A figure in a paper is an argument, not a screenshot of an array. It makes one
-claim, and a reader who skips the prose should still get that claim right.
-Default matplotlib output does not clear that bar: it is sized for a screen,
-titled where a caption belongs, colored from a cycle that collapses in
-greyscale, and rasterized where the document wants vector.
-
-Everything below is what separates a figure that survives review from one that
-gets remade the week before the deadline. It is worth the time: a reader skims
+A figure is an argument, not a screenshot of an array. It makes one claim, and
+a reader who skips the prose should still get that claim right. A reader skims
 the title, the abstract, and then the figures, so for most readers the figures
 *are* the result.
+
+Every chart is made with **viz**, the house figure library: one call per chart,
+the house style built in, and checks that flag a figure breaking the rules
+below. matplotlib (`assets/figstyle.py`) is the fallback only for the few
+shapes viz cannot draw, and TikZ is for diagrams.
+
+## Run viz
+
+`viz path` prints where the viz clone is. Every chart has a template there: a
+short script in `examples/NN_name.py` with its figure in
+`docs/gallery/NN_name.png`. `docs/guide.md` has viz's style rules and
+`docs/reference.md` every chart and option.
+
+```bash
+uv run --with-editable "$(viz path)" python figs/make_figs.py
+```
+
+If `viz` is not found, the dotfiles `setup.sh` installs it (it clones
+safety-research/viz beside the dotfiles and runs its `install.sh`). To render
+a JSON spec instead of Python: `viz render spec.json -o fig.png`.
+
+```python
+import viz
+fig = viz.hbar({"Closed book": 59, "With search": 12},
+               roles={"baseline": "Closed book", "intervention": "With search"},
+               title="With search, wrong answers fell from 59% to 12%")
+fig.save("fig.png")   # 2x PNG for chat, web and slides; .pdf for papers; .svg portable; .html for pages
+```
+
+To use a figure in an artifact, call `fig.html(standalone=False)`: it returns
+inline SVG and the Google Fonts link.
+
+For the stats viz does not compute (an interval of a difference, a Wilson
+interval, a Pareto front), vendor `assets/figstats.py` next to the figure
+scripts. It needs only numpy:
+
+```sh
+mkdir -p figs && cp ~/.claude/skills/plotting/assets/figstats.py figs/
+```
+
+Record the viz commit with the figure (`git -C "$(viz path)" rev-parse HEAD`
+in the run's metadata) so it can be regenerated exactly.
 
 ## Decide the claim before you plot
 
@@ -42,125 +78,212 @@ has to decode.
   another figure or the appendix.
 - **The axis of variation is the comparison.** Put the things the claim
   compares next to each other: adjacent bars, a shared x-axis, the same row of
-  panels with tight gaps. If the claim is about where conditions end up, a
-  grouped bar of final values beats ten overlapping training curves. Spacing
-  groups, too: panels close together invite comparison, and a wider gap
-  separates.
-- **Rank what the eye sees first.** Give the marks the claim is about full
-  saturation, the thicker line, and the larger marker. Supporting context
-  (baselines, other runs, raw points under a fit) stays visible but thinner,
-  lighter, or grey. Choose deliberately: enlarged points pull attention to the
-  data, and a heavier fitted line pulls it to the trend.
+  panels. If the claim is about where conditions end up, a grouped bar of
+  final values beats ten overlapping training curves.
+- **Rank what the eye sees first.** The condition the claim is about takes the
+  accent color; supporting context (baselines, other runs) stays gray. viz does
+  this through roles (see *Colors*); with no roles, `highlight=` accents one bar.
 - **Draw a diagram when a chart is the wrong tool.** A branching process, a
   pipeline, or a mechanism is clearer drawn than plotted
   ([references/diagram.md](references/diagram.md)).
 
+### Pick the chart
+
+The viz templates in `examples/` are grouped by the research question a figure
+answers; copy the closest one.
+
+- **Comparisons.** Rates by condition: `hbar`, with `notes=` for "352 of 400"
+  and `ci=` for intervals. Each model without and with the intervention:
+  `bars`. Several runs or seeds: never show one run when there are more; show
+  the mean with every run as a dot, `bars(..., runs=...)`. Each model's effect
+  with its interval, against zero: `dotplot`. Where the outcomes went: `stacked`.
+- **Training dynamics.** `line` with `runs=` for every seed faint behind the
+  mean, or `bands=` for an interval; `smooth=0.9` for a noisy reward;
+  `marks={step: "RL starts"}` for events; shares over training with
+  `area(..., normalize=True)`.
+- **Evaluations.** Several models on a few benchmarks:
+  `bars(scores, series=[models])`. A results table with the best per column
+  bold: `table`. Models against evals or attacks: `heatmap`. Two measures per
+  model: `scatter`, with `frontier="upper-left"` for a trade-off frontier.
+  Scaling: `line(..., xscale="log", yscale="log")`.
+- **Monitors and probes.** ROC curves: `line(..., diagonal="Chance")`. Scores
+  on two classes: `histogram`. A 2×2 confusion matrix: `tiles`. Probe accuracy
+  by layer: `line` with a `ref=` line at chance.
+- **Interpretability.** Activations in 2D: `scatter` with groups. A score on
+  every token: `tokens`. Steering strength: `line(..., xscale="category")`.
+- **Self-reports and ratings.** A −3..+3 scale: `likert`. Before and after:
+  `dumbbell`.
+- **Distributions.** `histogram`; `box` for many items per group; `strip` for
+  a few, one dot each.
+- **Transcripts.** `quotes` for contrasting replies, `episodes` for transcripts
+  side by side, `chat` for an agent's turns and tool calls. Literal model text
+  is set in monospace there, so it reads as data rather than as labels.
+- **Multi-panel figures.** `panels([...], cols=2)` with one shared legend.
+
 ## Non-negotiables
 
-1. **Build at the final printed size.** A figure drawn 8 inches wide and shrunk
-   to a 3.25-inch column has 3pt tick labels. Pick the width from the document
-   (`COLUMN`, `TEXT`, `WIDE` in the style module), then include it with
-   `width=\linewidth`, which scales by 1.0 once the size is right (see *Where
-   the figure goes*). Never build big and rescale to fit. A `WIDE` figure only
-   gets a 6.75-inch `\linewidth` inside a `figure*` — in a plain `figure` in a
-   two-column paper it silently scales to about a half.
-2. **Vector out.** Write PDF for `\includegraphics` and SVG alongside it for
-   preview. A rasterized *plot* — axes, lines, text — is a defect: it blurs
-   under the zoom every reviewer uses. PNG is correct only for genuinely
-   raster content: a photograph, a sample image grid, an attention map at
-   pixel resolution.
-3. **Every number comes from a run.** Read metrics from the run's own output
+1. **Every number comes from a run.** Read metrics from the run's own output
    under `output/`. Never plot a remembered, rounded, or plausible number, and
-   never leave synthetic demo data in a script that ships.
-4. **The caption is the title.** No `ax.set_title` on a paper figure — a title
-   duplicates the caption and steals vertical space. Panel letters (**a**,
-   **b**) are how you name parts of a multi-panel figure.
-5. **Show the uncertainty, or say there is none.** One seed is an anecdote.
-   Plot the interval across seeds (`band()`, i.e. `fill_between`; error bars
-   only where a band makes no sense) and state the seed count in the caption;
-   if you only have one run, say "single seed" rather than implying more.
-   **Say what the interval is over.** An interval across 100 samples of one
-   task measures sampling noise on that task. It says nothing about whether
-   the number holds on the next task. Resample over the unit the claim
-   generalizes over (seeds, tasks, prompts, environments), name that unit in
-   the caption, and name the uncertainty the bars cannot cover, such as a
-   single environment or a single model family. A rate over n binary
-   outcomes gets a `binomial_ci()` (Wilson) interval, not `mean_ci()` over
-   0/1 values, which collapses to a point at 0% or 100%.
-6. **Label the axes with units.** "Loss" is a label; "step" without knowing
-   whether it counts optimizer steps or tokens is not.
-7. **Colorblind-safe, greyscale-safe.** Use the module's palette. Never `jet`,
-   `rainbow`, or `hsv` — they invent structure that is not in the data.
-8. **Sans-serif text, and the same face in every figure.** `use_style()`
-   defaults to a Helvetica-metric sans, which is what Nature and Science
-   require in figures and what survives the 5-8pt sizes tick labels print at.
-   Figure text is its own register — it does not have to match the body font,
-   but it must match across your figures, diagrams included. Pass
-   `use_style(family="serif")` only for a figure carrying heavy math that
-   should read as part of a serif-set page.
+   never leave synthetic demo data in a script that ships. Made-up data for a
+   "dream figure" says so in the subtitle: "Example data".
+2. **Show the uncertainty, or say there is none.** One seed is an anecdote.
+   Show the interval across seeds (`ci=`, `bands=`, or every run with `runs=`)
+   and state the seed count in the text; if you only have one run, say
+   "single seed" rather than implying more. **Say what the interval is
+   over.** An interval across 100 samples of one task measures sampling noise
+   on that task. It says nothing about whether the number holds on the next
+   task. Resample over the unit the claim generalizes over (seeds, tasks,
+   prompts, environments), name that unit, and name the uncertainty the bars
+   cannot cover, such as a single environment or a single model family. A
+   rate over n binary outcomes gets a `binomial_ci()` (Wilson) interval, not a
+   mean interval over 0/1 values, which collapses to a point at 0% or 100%.
+3. **Label the axes with units.** "Loss" is a label; "step" without knowing
+   whether it counts optimizer steps or tokens is not. Rescale large units in
+   the label ("Tokens seen (billions)") rather than printing 400,000,000.
+4. **Build at the final size.** Pick the size for where the figure goes
+   (*Size*) and never shrink a figure afterwards: rescaling a figure rescales
+   its text with it.
+5. **Vector for papers.** `.pdf` for `\includegraphics`, `.svg` for a portable
+   copy. A rasterized plot blurs under the zoom every reviewer uses. PNG is
+   right for chat, web pages and slides.
+6. **Colors keep their meaning.** One color per condition across every figure
+   of a write-up, set once with roles (*Colors*). Never `jet`, `rainbow` or
+   `hsv` in a fallback figure: they invent structure that is not in the data.
 
-## House rules
+## Titles and captions: decided by where the figure goes
 
-These hold on top of the non-negotiables, for every figure:
+| The figure goes to | Title | Caption |
+| --- | --- | --- |
+| A report, chat answer, slide, post or artifact | **The finding**, as one plain sentence (*Write the title*) | None in or under the figure; context goes in the surrounding text |
+| A paper (`.tex`) | **None** (`title=None`); viz then warns "No title", which is expected here and the only warning to leave | The LaTeX caption carries the claim (*Write the caption*) |
 
-- **Accuracy and similar bounded metrics are plotted on 0-100**, not 0-1, and
-  the axis label carries the unit (`Accuracy (%)`).
-- **Edges on filled elements**: `edgecolor="black"`, `linewidth=0.4-0.8` on
-  bars, scatter markers, and patches. A fill without an edge loses its
-  boundary in greyscale and against a grid.
-- **One color per condition, across every figure.** Fix the
-  condition-to-color mapping once per project (a `COLORS` dict beside the
-  vendored `figstyle.py`, imported by every figure script) and never let
-  the color cycle assign it. A reader who learned "red is ours" in Figure 1
-  should not have to relearn it in Figure 4. Baselines stay grey, and variants
-  of one method share a hue in shades (`family()`).
-- **Literal text is monospace**: prompts, tokens, code, and model outputs
-  quoted in a figure (`fontfamily="monospace"`), so they read as data rather
-  than as labels.
-- **Grid on by default**, behind the data. `use_style()` already sets a light
-  y-grid with `axes.axisbelow`; add `ax.grid(axis="x")` only when the reader
-  has to read values off the x-axis too.
-- **The legend must not sit on the data.** `ax.legend()` with the default
-  `loc="best"` still lands on bars, lines, or histogram mass whenever the
-  axes are full, which is the usual case for bar charts and overlaid
-  histograms. Check the rendered figure; if the legend covers any mark, move
-  it outside the axes rather than shrinking it: above the plot with
-  `fig.legend(loc="outside upper center", ncol=<n series>)`, or to the right
-  with `fig.legend(loc="outside right upper")`. Use `fig.legend`, not
-  `ax.legend` with `bbox_to_anchor`: `figure()` and `figure_grid()` use
-  constrained layout, which shrinks the axes to fit a figure-level "outside"
-  legend inside the fixed canvas, whereas an axes legend anchored past the
-  axes edge is clipped because `save()` never trims with `bbox_inches`.
-  Direct end-labels (`label_ends()`) or a caption that names the series are
-  also fine. Only leave a legend inside the axes when there is genuinely
-  empty space for it, and then frame it (`frameon=True`) so it does not read
-  as part of the chart.
-- **Deliver the file.** After writing a figure, send it to the user with
-  `SendUserFile` — a path in a message is not a delivered figure.
+Panel titles inside `panels` are still used in a paper: `(a) Over training`,
+`(b) After training`. Prose refers to "Fig. 2b".
 
-## Set up once per project
+### Write the title
 
-Vendor the style module next to the figure scripts so a figure stays
-reproducible after this session ends:
+Readers look at the title first and remember it better than the chart, so the
+title carries the finding and nothing else on the figure competes with it.
 
-```sh
-mkdir -p figs && cp ~/.claude/skills/plotting/assets/figstyle.py figs/figstyle.py
+- One finding, stated literally: what was compared and what happened, in about
+  10 plain words. If it needs a semicolon, make two figures.
+- Name what the eye sees first, the highlighted bar or the biggest gap. If the
+  point is a small difference, change the chart (highlight it, drop other
+  bars), not the words.
+- Say what was measured, not what it means: "rated the episode higher", not
+  "felt better"; "chose to stop", not "wanted to stop".
+- Numbers, not adjectives: "fell from 41% to 28%", not "dropped sharply".
+- No colon setups ("The fix: search"), mirrored phrasing, metaphors, wordplay
+  or questions. No names coined inside the project. Field terms the readers use
+  daily are fine.
+
+Subtitle: none by default. Add one only to say "Example data" when the numbers
+are made up, or what the error bars are ("Error bars are 95% intervals"), or
+both. Sample sizes, methods, training details and model names go in the text.
+If the measure needs a sentence to explain, show a simpler measure.
+
+Numbers as measured: viz prints each value with the digits it has and never
+rounds it. A computed value such as a mean over seeds can have more digits
+than it deserves (18.475%): choose its precision with `decimals=` and quote the
+printed number in the title. One name per condition, the same in every figure
+and in the text.
+
+Check: read the title alone. Someone outside the project should be able to
+repeat the finding without asking what a word means.
+
+### Write the caption
+
+For a paper, the caption is written *with* the figure, not after the draft.
+Captions in current papers run a median of about 28 words, and half are three
+sentences or more. The dominant shape is a **short bold phrase naming the
+claim, then the detail a reader needs to trust it**:
+
+```latex
+\caption{\textbf{LPO reaches the reward plateau in a third of the compute.}
+Held-out reward against training compute for LPO and two baselines; mean of 5
+seeds, bands are 95\% intervals. The dotted line is the pretrained model.}
 ```
 
-Vendor it next to whichever destination the script lives in — a script under
-`output/.../plots/` needs its own copy there, or the import fails.
+- **Lead with the finding, not the setup.** "Training curves for LPO and
+  baselines" names the axes, which the axes already do.
+- **The figure must stand alone.** A reader who skips your Section 4 should
+  still get the claim right.
+- **Put the method facts here**: seed count, what the band or bar means, any
+  smoothing, any normalization, which points were fitted and which excluded,
+  and whether a frontier line is measured or a guide.
+- **Say what is not shown** when it matters: a single seed, a truncated axis,
+  a run cut short.
+- **Do not restate the axis labels** in prose.
 
-Then find an interpreter that has matplotlib, in this order — do not install
-into the project's environment without asking:
+A one-panel figure earns roughly 25-40 words; a multi-panel figure earns more,
+and each panel needs its own clause.
 
-```sh
-uv run python -c "import matplotlib"               # the project env already has it
-uv run --with matplotlib --with numpy python figs/loss_curve.py
+**A figure in a research update carries more around it.** In an experiment
+report, a chat answer, or a Slack thread, the reader knows the project but not
+this run. Their job is to catch a mistake before it compounds. The title states
+the finding; the paragraph next to the figure gives everything they need to
+check it: the data and the split, n and the unit of n, how the interval was
+computed, the key hyperparameters, and every non-obvious choice (a filter, an
+excluded run, a changed prompt).
+
+## Colors
+
+Name the conditions once and let viz color them: gray for the control, then
+orange, blue, sage, purple and ochre for the interventions in that order, a
+light-to-dark blue ramp for ordered conditions (doses, sizes, steps), and light
+gray for everything else. A reference (chance, the base model) is a dashed
+`ref=` line, not a color.
+
+```python
+viz.set_roles(control="Closed book", intervention="With search", second="Rerank", ordered=["1M", "3M", "10M"])
 ```
+
+- **One file per write-up.** A `viz-roles.json` in the working folder or above
+  (`{"baseline": "Closed book", "intervention": ["With search"]}`) sets the
+  roles for every script there; `viz roles` shows them. If one exists, use its
+  label names exactly.
+- **Set roles before building panels.** A chart takes its colors when it is
+  made, so call `viz.set_roles` (or pass `roles=` to each chart) before the
+  charts that go into `panels`.
+- Don't hand-pick `colors=`; role names work as colors
+  (`legend={"Search": "intervention"}`). The one exception: outcomes rather
+  than conditions (right, unsure, wrong) are blue, beige and orange,
+  `colors=["blue", "beige", "coral"]`.
+- Without roles, several series take orange, blue, sage, purple and ochre in
+  that order. Purple and blue look alike to some color-blind readers, so with
+  four or more, name lines at their ends (`line` does by default).
+- In a fallback matplotlib or TikZ figure, take the hex values from
+  `viz.PALETTE` so a condition keeps its color across both.
+
+## Order
+
+Put categories in order of their values (`sort=True`, largest first;
+`sort="asc"` when smaller is better) unless the order means something, such as
+model release, size, training step, or the column order of a results table.
+`sort=False` keeps a chosen order without the warning. In grouped bars, keep
+the method order identical in every group and in the legend.
+
+## Size
+
+| Size | Width | For |
+| --- | --- | --- |
+| `screen` (default) | 1008 px | reports, chat, web pages, artifacts |
+| `slide` | 16:9 | a full slide |
+| `paper` | 6.75 in | full text width of a two-column paper (`figure*`) |
+| `column` | 3.25 in | one column of a two-column paper |
+
+One size per write-up: `viz.set_defaults(size="paper")`. A one-column NeurIPS
+page (5.5 in) is `viz.Size(width=610, plot=260, title=16, inches=5.5)`. PDFs
+come out at the printed width, so they need no scaling. Titles must fit on one
+line at the chosen size.
+
+**Paper fonts.** viz sets labels in Newsreader, a serif. For a paper whose
+diagrams are sans (the TikZ preamble uses Helvetica), pass
+`viz.set_defaults(font="sans")` so labels, ticks and legends switch to DM Sans
+and the figures read as one family. Figure text must match across a paper's
+figures, not the body font.
 
 ## Where the figure goes
-
-Two destinations:
 
 | The figure is for | Write it to |
 | --- | --- |
@@ -173,96 +296,53 @@ rather than accumulates. A flat `output/plots/` is acceptable only in a repo
 that already uses it — then timestamp the filename instead.
 
 Keep the generating script beside its output (`figs/loss_curve.py` →
-`figs/loss_curve.pdf`, `figs/loss_curve.svg`). A figure whose script is gone
-cannot be corrected when a reviewer asks for one more seed. Never write a
-figure you intend to hand over into `/tmp` or a scratch directory; pulling logs
-or intermediate data there is fine — the figure, and the script that made it,
-are not intermediate.
+`figs/loss_curve.pdf`). A figure whose script is gone cannot be corrected when
+a reviewer asks for one more seed. Never write a figure you intend to hand over
+into `/tmp` or a scratch directory; pulling logs or intermediate data there is
+fine — the figure, and the script that made it, are not intermediate.
 
-Build the figure at the column width, **and** still write `width=\linewidth`:
+Build the figure at its printed size, **and** still write `width=\linewidth`:
 
 ```latex
-\begin{figure}[t]          % figure* for a WIDE figure in a two-column paper
+\begin{figure}[t]          % figure* for a `paper`-size figure in a two-column paper
   \centering
   \includegraphics[width=\linewidth]{figs/loss_curve.pdf}
-  \caption{Validation loss over training, mean of 5 seeds with 95\% intervals.}
+  \caption{\textbf{...}}
   \label{fig:loss}
 \end{figure}
 ```
 
-The two together are the point. Sized correctly, `width=\linewidth` scales by
-1.0 and changes nothing — but it still fits if the venue's column turns out
-narrower than you assumed. What it cannot do is rescue a figure built at the
-wrong size: a 15-inch canvas dropped into a 5.5-inch column is scaled to 0.35,
-and 11pt tick labels land at 4pt. That is the most common reason a real paper's
-figures are unreadable, and `width=\linewidth` is what hides it until print.
-
-## Write the caption with the figure
-
-Every reference below tells you to "state it in the caption". This is what that
-means, and the caption is written *with* the figure, not after the draft. For a
-figure that is not going into a `.tex`, the caption is the paragraph you write
-next to it in the report or the chat message — the requirement is the same.
-
-Captions in current papers run a median of about 28 words, and half are three
-sentences or more. The dominant shape is a **short bold phrase naming the
-claim, then the detail a reader needs to trust it**:
-
-```latex
-\caption{\textbf{LPO reaches the reward plateau in a third of the compute.}
-Held-out reward against training compute for LPO and two baselines; mean of 5
-seeds, bands are 95\% intervals. The dotted line is the pretrained model.}
-```
-
-- **Lead with the finding, not the setup.** "Training curves for LPO and
-  baselines" names the axes, which the axes already do. The caption's first
-  clause should be the thing you want remembered.
-- **The figure must stand alone.** A reader who skips your Section 4 should
-  still get the claim right. That is the whole job.
-- **Put the method facts here**, because nowhere else in the figure has room:
-  seed count, what the band or bar means, any smoothing, any normalization,
-  which points were fitted and which excluded, and whether a frontier line is
-  measured or a guide.
-- **Say what is not shown** when it matters — a single seed, a truncated axis,
-  a run cut short.
-- **Do not restate the axis labels** in prose, and do not repeat the caption as
-  an axes title. The title is the caption's job.
-
-A one-panel figure earns roughly 25-40 words; a multi-panel figure earns more,
-and each panel needs its own clause.
-
-**A figure in a research update carries more.** In an experiment report, a
-chat answer, or a Slack thread, the reader knows the project but not this
-run. Their job is to catch a mistake before it compounds. Lead with the same
-bold claim, then give everything they need to check it: the data and the
-split, n and the unit of n, how the interval was computed, the key
-hyperparameters, and every non-obvious choice (a filter, an excluded run, a
-changed prompt). Length is fine here: a paragraph a reviewer can audit beats
-a sentence they have to ask about.
+Sized correctly, `width=\linewidth` scales by 1.0 and changes nothing, but it
+still fits if the venue's column turns out narrower than you assumed. What it
+cannot do is rescue a figure built at the wrong size. A `paper`-size figure
+only gets a 6.75-inch `\linewidth` inside a `figure*`; in a plain `figure` in
+a two-column paper it silently scales to about a half.
 
 ## Multi-panel figures
 
-Roughly a quarter of figures in current ML papers are multi-panel — `(a)`/`(b)`
-subpanels, or a `Left:`/`Right:` pair. Panels are a composition choice that cuts
-across every figure type below, and they go wrong in consistent ways.
+Roughly a quarter of figures in current ML papers are multi-panel. Build them
+with `viz.panels([...], cols=2)`; each chart's title becomes its panel title.
 
-- **Label every panel** `(a)`, `(b)`, … at the top-left (`panel_labels()`).
-  Prose refers to "Fig. 2b"; without letters the only way to name a panel is by
-  position, which breaks the moment one moves.
-- **Share the axis when panels share a quantity** (`sharey=True`), and let the
-  shared axis carry one label on the panel that shows the ticks. Two panels of
-  the same metric on silently different ranges is the multi-panel version of a
-  truncated bar axis — the reader compares heights that are not comparable.
-- **One legend for the figure**, not one per panel. Put it under the panels or
-  outside the last one.
-- **Panels read in argument order**: left to right, top to bottom. Panel (a)
-  should be the one the text discusses first.
+- **Letter every panel** in its title, `(a) ...`, `(b) ...`, and read them in
+  argument order: left to right, top to bottom.
+- **Share the axis when panels share a quantity**: pass the same `ticks=` and
+  `domain=` to each chart. Two panels of the same metric on silently different
+  ranges is the multi-panel version of a truncated bar axis.
+- **One legend for the figure**: `panels` merges them.
 - **If the panels do not support one claim, they are separate figures.** A
-  2×3 grid of unrelated plots is a contact sheet, and its caption will read as
-  a list rather than a sentence.
+  2×3 grid of unrelated plots is a contact sheet.
 
-Build them with `figure_grid(nrows, ncols, width=TEXT, sharey=True)`, which
-sizes the whole grid to the final printed width.
+## When viz cannot draw it
+
+viz has no dashed series, no hollow markers, no free text inside a line or bar
+plot (only `scatter` takes `annotations=`), and no frontier per group. For a figure whose claim needs one of those (an
+extrapolated fit, several methods' frontiers over every run), use the
+matplotlib fallback: vendor `assets/figstyle.py` *and* `assets/figstats.py`
+next to the script, color conditions with `viz.PALETTE` hex values, and say in
+the hand-over that the figure is a fallback. The references show which
+figures need it. Run it with
+`uv run --with matplotlib --with numpy python figs/<name>.py` and read the
+audit line its `save()` prints (`clean` is the bar).
 
 ## Read exactly one reference
 
@@ -281,37 +361,32 @@ caption. If it is not your claim, you have the wrong row.
 | What is the paper's one phenomenon (Figure 1, the teaser)? | "here is the idea, and here it is happening" | [references/teaser.md](references/teaser.md) |
 | What is the method, architecture, or pipeline? | (a diagram, not a chart) | [references/diagram.md](references/diagram.md) |
 
-Every reference's template writes to `figs/`, which is the paper destination.
-For an experiment or a chat answer, put both the script and its `save()` stem
-under the run's `plots/` directory instead — they stay together either way.
+Every reference's template writes to `figs/`, the paper destination, with
+`TITLE = None`. For an experiment or a chat answer, put the script and its
+output under the run's `plots/` directory instead, set `TITLE` to the finding,
+and use the default `screen` size.
 
-Do not read references for figures you are not making.
-
-Anything genuinely outside those eight — a photograph, a qualitative sample
-grid, a map — still obeys the non-negotiables above and the style module.
+Do not read references for figures you are not making. For anything outside
+those eight, copy the closest template in `$(viz path)/examples/`.
 
 ## Before you hand it over
 
-- **Read the audit line `save()` prints.** It checks the printed width, the
-  Type 42 font embedding, stray axes titles, missing axis labels, text below
-  the 5pt floor, text that overlaps other text, and text running off the
-  canvas. `clean` is the bar; anything else is a defect to fix, not a warning
-  to note and move past.
-- One audit finding is not yours to fix: if it reports no publication font on
-  the machine, say so when you hand the figure over rather than installing
-  fonts, which is a change to the environment you should ask about first.
-- A label placed at a reference line or a data point is the usual source of an
-  overlap — it lands on a tick label at some data ranges and not others. Move
-  it, or give it `backgroundcolor="white"` so it masks what it covers.
-- Open the PDF and read it at printed size. If a tick label is unreadable on
-  screen at 100%, it is unreadable on paper.
-- Every axis labelled, with units. No stray `ax.set_title`.
-- The claim in the caption is visible in the figure without the prose, and it
-  is the sentence the figure's shape says.
+- **Fix every viz check warning** that saving prints. The one exception is
+  "No title" on a paper figure. `viz check spec.json` checks specs without
+  rendering.
+- **Look at every PNG before you send it.** The checks cover titles, colors and
+  order, not layout: tick labels that run into each other (thin them with
+  `xticks=`), end labels that collide with a reference line, values with more
+  digits than they deserve (`decimals=`).
+- Every axis labelled, with units.
+- The claim in the title (or the caption) is visible in the figure without the
+  prose, and it is the sentence the figure's shape says.
 - If you sketched a prediction, compare the result with it, and report a
   mismatch as a result rather than smoothing it over.
 - Uncertainty shown, with n and the unit of n stated.
 - Each condition has the color it has in the project's other figures.
 - No unexplained series, no legend entry for something that was cut.
 - The script reruns from scratch and reproduces the same file.
-- Send the file to the user (`SendUserFile`), not just its path.
+- In a write-up, use `fig.alt_text()` as the image's alt text.
+- **Deliver the file**: send it to the user (`SendUserFile` or a clickable
+  link), not just its path.

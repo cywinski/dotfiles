@@ -18,32 +18,25 @@ legitimately, and a bar is the right mark for them.
 
 ## Grouped bars across benchmarks
 
-**Hue is the method family, shade is the variant.** Grey for the untuned base
-model, one hue for prior work, one hue for yours, shaded light-to-dark within
-each (`family()` in the style module). A reader separates "theirs" from "ours"
-before reading a single legend entry. Seven arbitrary colors communicate
-nothing.
+**Roles carry the method family.** The untuned base model is the control
+(gray), prior work is `second` (blue), yours is `intervention` (orange), and
+variants of one method are an `ordered` light-to-dark ramp. A reader separates
+"theirs" from "ours" before reading a single legend entry. Seven arbitrary
+colors communicate nothing.
 
 **Keep the method order identical in every group,** and keep it in the legend
 order. The figure is read by scanning one method's bar position across groups;
 re-sorting per group destroys that.
 
-**Label every bar with its value.** It makes the figure do the results table's
-job as well, and a reader quoting your numbers does not have to squint at the
-axis. This is the one place type may go below the 7pt tick size, down to the
-5pt floor: the label
-is redundant with the bar's height, so a reader who cannot read it still
-recovers the value from the axis. Around 5pt at full text width; if bars get
-so dense the labels collide, that is the signal to drop a method or split the
-figure, not to shrink further.
+**Label every bar with its value** (viz does by default). It makes the figure
+do the results table's job as well, and a reader quoting your numbers does not
+have to squint at the axis. If bars get so dense the labels collide, that is
+the signal to drop a method or split the figure, not to shrink the text.
 
 **Order the benchmark groups deliberately** — by difficulty, by size, or to
 match the results table. Alphabetical is a missed opportunity.
 
-**Frame the legend when it sits over the plot area** and place it where the
-bars are shortest. The house style leaves legends unframed, which is right when
-they sit outside the axes; a legend floating over data needs an opaque box so
-it does not read as part of the chart.
+**The legend sits above the plot**, off the bars; viz places it there.
 
 A grouped chart tops out around 6 methods × 6 groups. Past that, no amount of
 styling saves it — use a table.
@@ -54,7 +47,7 @@ When the claim is "this component matters", plot `variant − baseline` with a
 line at zero, sorted by effect. The reader sees sign, size, and whether the
 interval crosses zero, which is the entire question.
 
-Show the interval **of the difference** (`diff_ci`). Two overlapping
+Show the interval **of the difference** (`diff_ci` in `figstats.py`). Two overlapping
 per-variant intervals do **not** mean the difference is indistinguishable from
 zero — a widely repeated error. If a variant's interval crosses zero, the
 honest reading is "no detectable effect at this seed count".
@@ -65,15 +58,15 @@ caption and do not draw whiskers that imply otherwise.
 ## When the figure should be a table
 
 If the reader needs exact numbers, or there are more than ~8 variants, or the
-differences are within noise, a `booktabs` table communicates better than any
-chart.
+differences are within noise, a table communicates better than any chart:
+`viz.table` for a report, `booktabs` for a paper.
 
 ## Traps
 
 | Trap | Fix |
 | --- | --- |
 | Bar chart with a truncated y-axis | Start at zero, or switch to a delta dot plot |
-| Every method a different hue | Grey base, one hue per family, shade within |
+| Every method a different hue | Gray base, one role per family, an `ordered` ramp within |
 | Method order varies per group | Fix the order; match the legend |
 | Error bars of unstated meaning | State it: "95% CI over 5 seeds". SD, SEM, and CI differ by large factors |
 | Rotated 45° tick labels | Horizontal dots with left-aligned names, or a wider figure |
@@ -85,92 +78,35 @@ chart.
 `figs/benchmarks.py`, reading `figs/benchmarks.csv` (`benchmark,method,score`):
 
 ```python
-"""Accuracy across benchmarks. Regenerate: python figs/benchmarks.py"""
+"""Benchmark accuracy per method.
+
+Regenerate: uv run --with-editable "$(viz path)" python figs/benchmarks.py
+"""
 
 import csv
-import math
 from collections import defaultdict
 
-import numpy as np
-from figstyle import MUTED, WIDE, family, figure, save, use_style
+import viz
 
 DATA = "figs/benchmarks.csv"
-
-# Fixed order everywhere, and the family each method belongs to. Grey for the
-# untuned model, blue for prior work, red for ours.
-METHODS = [
-    ("Qwen2.5-Math-7B", "base"),
-    ("SimpleRL-Zero-7B (GRPO)", "prior"),
-    ("OpenReasoner-Zero-7B (PPO)", "prior"),
-    ("Oat-Zero-7B (Dr.GRPO)", "prior"),
-    (r"ES$_\mathrm{CHKPT-1}$", "ours"),
-    (r"ES$_\mathrm{CHKPT-2}$", "ours"),
-    (r"ES$_\mathrm{CHKPT-3}$", "ours"),
-]
-BENCHMARKS = ["AIME 2024", "Minerva Math", "OlympiadBench", "AMC", "MATH500"]
-
-
-def method_colors():
-    members = defaultdict(list)
-    for name, group in METHODS:
-        members[group].append(name)
-    shades = {
-        "base": [MUTED] * len(members["base"]),
-        "prior": family("blue", len(members["prior"])),
-        "ours": family("red", len(members["ours"])),
-    }
-    return {
-        name: shades[group][members[group].index(name)] for name, group in METHODS
-    }
-
-
-def load(path):
-    scores = defaultdict(dict)
-    with open(path) as handle:
-        for row in csv.DictReader(handle):
-            scores[row["method"]][row["benchmark"]] = float(row["score"])
-    return scores
+# Method order is fixed in every group and in the legend; benchmarks in the order of the results table.
+METHODS = ["Base model", "Prior work", "Ours"]
+BENCHMARKS = ["MMLU", "GPQA", "MATH"]
+ROLES = {"baseline": "Base model", "second": "Prior work", "intervention": "Ours"}  # or viz-roles.json
+TITLE = None  # paper: the caption carries the claim. Report or chat: the finding, as a sentence.
 
 
 def main():
-    use_style()
-    scores = load(DATA)
-    colors = method_colors()
+    viz.set_defaults(size="paper")
+    score = defaultdict(dict)
+    with open(DATA) as handle:
+        for row in csv.DictReader(handle):
+            score[row["benchmark"]][row["method"]] = float(row["score"])
 
-    fig, ax = figure(width=WIDE, ratio=0.28)
-    x = np.arange(len(BENCHMARKS))
-    # Near-touching bars inside a group; the gap between groups does the separating.
-    width = 0.9 / len(METHODS)
-
-    for i, (name, _) in enumerate(METHODS):
-        offset = (i - (len(METHODS) - 1) / 2) * width
-        bars = ax.bar(
-            x + offset,
-            [scores[name][benchmark] for benchmark in BENCHMARKS],
-            width,
-            label=name,
-            color=colors[name],
-            edgecolor="black",
-            linewidth=0.4,
-        )
-        # Redundant with the bar height, so it may sit at the 5pt floor.
-        ax.bar_label(bars, fmt="%.1f", fontsize=5, padding=1.5)
-
-    ax.set_xticks(x, BENCHMARKS)
-    ax.set_ylabel("Accuracy (%)")
-    # Derived, never hardcoded: a bar clipped at the axes edge no longer
-    # encodes its value, which is the failure this whole reference is about.
-    highest = max(v for row in scores.values() for v in row.values())
-    top = max(10, 10 * math.ceil(highest * 1.12 / 10))
-    ax.set_ylim(0, top)
-    ax.set_yticks(range(0, top + 1, 10))
-    ax.tick_params(axis="x", length=0)
-    ax.legend(
-        ncol=2, loc="upper left", fontsize=6.5,
-        frameon=True, framealpha=1.0, edgecolor="black", borderpad=0.5,
-    )
-
-    save(fig, "figs/benchmarks")
+    data = {bench: [score[bench][m] for m in METHODS] for bench in BENCHMARKS}
+    fig = viz.bars(data, series=METHODS, roles=ROLES, sort=False, ylabel="Accuracy", title=TITLE)
+    fig.save("figs/benchmarks.pdf")
+    fig.save("figs/benchmarks.png")
 
 
 if __name__ == "__main__":
@@ -179,67 +115,46 @@ if __name__ == "__main__":
 
 ## Template — ablation deltas
 
-`figs/ablation.py`, reading `figs/ablation.csv` (`variant,seed,value`):
+`figs/ablation.py`, reading `figs/ablation.csv` (`variant,seed,value`).
+Run it with `uv run --with-editable "$(viz path)" --with numpy python figs/ablation.py`, with `figstats.py` vendored in `figs/`.
 
 ```python
-"""Accuracy change vs. the baseline. Regenerate: python figs/ablation.py"""
+"""Ablation deltas against the full method.
+
+Regenerate: uv run --with-editable "$(viz path)" --with numpy python figs/ablation.py
+"""
 
 import csv
 from collections import defaultdict
 
-import numpy as np
-from figstyle import BASELINE, COLUMN, PALETTE, diff_ci, figure, save, use_style
+import viz
+from figstats import diff_ci
 
 DATA = "figs/ablation.csv"
-REFERENCE = "baseline"
-HIGHLIGHT = "ours"
-
-
-def load(path):
-    runs = defaultdict(list)
-    with open(path) as handle:
-        for row in csv.DictReader(handle):
-            runs[row["variant"]].append(float(row["value"]))
-    return {variant: np.array(values) for variant, values in runs.items()}
+FULL = "Full method"
+TITLE = None  # paper: the caption carries the claim. Report or chat: the finding, as a sentence.
 
 
 def main():
-    use_style()
-    runs = load(DATA)
-    reference = runs[REFERENCE]
-    n_seeds = min(len(values) for values in runs.values())
+    viz.set_defaults(size="column")
+    runs = defaultdict(list)
+    with open(DATA) as handle:
+        for row in csv.DictReader(handle):
+            runs[row["variant"]].append(float(row["value"]))
 
-    effects = [
-        (variant, *diff_ci(values, reference))
-        for variant, values in runs.items()
-        if variant != REFERENCE
-    ]
-    effects.sort(key=lambda row: row[1])  # ascending: best ends up on top
+    delta, ci = {}, {}
+    for variant, values in runs.items():
+        if variant == FULL:
+            continue
+        # The interval of the difference, not two per-variant intervals.
+        d, lo, hi = diff_ci(values, runs[FULL])
+        delta[variant], ci[variant] = d, (lo, hi)
+        print(f"{variant}: {d:+.2f} [{lo:+.2f}, {hi:+.2f}], n={len(values)} vs {len(runs[FULL])}")
 
-    fig, ax = figure(width=COLUMN, ratio=0.1 + 0.16 * len(effects))
-    ax.axvline(0, color=BASELINE, linewidth=0.8, zorder=1)
-
-    for y, (variant, delta, lo, hi) in enumerate(effects):
-        color = PALETTE["blue"] if variant == HIGHLIGHT else "#4D4D4D"
-        ax.plot([lo, hi], [y, y], color=color, linewidth=1.0, solid_capstyle="round", zorder=2)
-        ax.plot([delta], [y], "o", color=color, zorder=3)
-        # Sign included: a delta figure is read for direction first.
-        ax.annotate(
-            f"{delta:+.2f}",
-            xy=(hi, y), xytext=(4, 0), textcoords="offset points",
-            va="center", fontsize=7, color=color,
-        )
-
-    ax.set_yticks(range(len(effects)), [variant for variant, *_ in effects])
-    ax.set_ylim(-0.6, len(effects) - 0.4)
-    ax.set_xlabel(f"Accuracy vs. {REFERENCE} (points)")
-    ax.grid(axis="x")
-    ax.grid(axis="y", visible=False)
-    ax.tick_params(axis="y", length=0)
-    ax.margins(x=0.18)
-    print(f"n={n_seeds} seeds per variant — state this in the caption")
-
-    save(fig, "figs/ablation")
+    fig = viz.dotplot(delta, ci=ci, ref=0, sort=True, unit="", decimals=1, signed=True,
+                      xlabel="Accuracy change vs. full method (points)", title=TITLE)
+    fig.save("figs/ablation.pdf")
+    fig.save("figs/ablation.png")
 
 
 if __name__ == "__main__":
@@ -249,9 +164,8 @@ if __name__ == "__main__":
 ## Checklist
 
 - [ ] Bars start at zero; nothing is truncated.
-- [ ] Hue is the method family, shade the variant; grey for the base model.
+- [ ] Roles carry the method family; gray for the base model.
 - [ ] Method order identical across groups and matching the legend.
 - [ ] Every bar labelled, and no labels collide.
 - [ ] Deltas: intervals are *of the difference*, with n and their meaning in the caption.
-- [ ] Legend framed only where it sits over data, placed clear of the tallest bars.
 - [ ] More than ~8 variants, or numbers needed exactly? Table instead.

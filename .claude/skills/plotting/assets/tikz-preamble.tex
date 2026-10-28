@@ -4,7 +4,7 @@
 % next to the source), or copy the \definecolor and \tikzset blocks into a
 % paper's preamble and \input the tikzpicture directly.
 %
-% The colors are the same Okabe-Ito values as figstyle.PALETTE, so a
+% The colors are the viz palette (viz.PALETTE), so a
 % diagram and a plot in the same paper agree on what "ours" is colored.
 
 \documentclass[border=2pt]{standalone}
@@ -24,11 +24,14 @@
 % turn its body text sans too. For a serif diagram to match plots built with
 % use_style(family="serif"), drop the \sffamily from the three font= styles.
 
-\definecolor{figblue}{HTML}{0072B2}
-\definecolor{figorange}{HTML}{E69F00}
-\definecolor{figgreen}{HTML}{009E73}
-\definecolor{figred}{HTML}{D55E00}
-\definecolor{figpurple}{HTML}{CC79A7}
+% Named by viz role: figorange is the intervention, then blue, sage, purple,
+% ochre; figgray is the control.
+\definecolor{figorange}{HTML}{B8664E}
+\definecolor{figblue}{HTML}{557E98}
+\definecolor{figsage}{HTML}{668574}
+\definecolor{figpurple}{HTML}{88719A}
+\definecolor{figochre}{HTML}{9E7A3D}
+\definecolor{figgray}{HTML}{C2BFB9}
 
 \tikzset{
   % Every picture starts from this: one arrow tip, one line weight, one font.
@@ -44,7 +47,7 @@
     minimum height=6.5mm, minimum width=15mm, inner sep=3pt, align=center,
   },
   % The contribution. Exactly one kind of thing in a figure should be accented.
-  ours/.style={block, draw=figblue, fill=figblue!7, line width=0.7pt},
+  ours/.style={block, draw=figorange, fill=figorange!7, line width=0.7pt},
   % Context that must be present but is not the point.
   muted/.style={block, draw=black!30, fill=black!3, text=black!65},
   % A tensor, dataset, or artifact rather than an operation.
@@ -55,7 +58,7 @@
   },
   flow/.style={->, draw=black!65},
   % A gradient, stop-gradient, or otherwise non-forward path.
-  backflow/.style={->, draw=figorange, dashed},
+  backflow/.style={->, draw=figblue, dashed},
   % Shapes, losses, and other annotations that ride on an edge.
   edgelbl/.style={font=\sffamily\scriptsize, text=black!60, inner sep=1.5pt, fill=white},
   % A named stage grouping several blocks.

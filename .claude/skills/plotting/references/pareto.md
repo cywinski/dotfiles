@@ -11,7 +11,8 @@ frontier is the honest object, and it is the figure.
 ## The frontier is the claim; the runs are the evidence
 
 Plot **every run** as a faded marker, then connect each method's non-dominated
-points (`pareto_front` in the style module) as a solid line. The comparison a
+points as a solid line (viz's `scatter(..., frontier=)` for one set of points;
+`pareto_front` in `figstats.py` per method in the fallback). The comparison a
 reader makes is whether one method's frontier sits above and to the left of the
 other's across the range — not whether one dot beats another dot.
 
@@ -35,8 +36,8 @@ reaches the good corner, it usually does not. Check the rendered figure before
 committing to one.
 
 Better where the plot area is crowded: tint the good and bad regions instead of
-labelling a point in them — `ax.axhspan`/`axvspan`, or a faint diagonal wash at
-very low alpha behind the data. A background carries the direction without
+labelling a point in them (fallback only: `ax.axhspan`/`axvspan`, or a faint
+diagonal wash at very low alpha behind the data). A background carries the direction without
 competing for space with the markers, and it cannot collide with anything.
 
 Cost-like axes — FLOPs, latency, parameters, tokens — are usually log; a linear
@@ -50,7 +51,10 @@ of settings per method in the legend or caption, and give each method a
 comparable budget. This is the single most common way a trade-off figure
 flatters the authors' method without anyone lying.
 
-## Encoding
+## Encoding (several methods: the fallback)
+
+viz's `scatter` draws one frontier, through all its points. To compare methods'
+frontiers over every run, use the matplotlib fallback, encoded like this:
 
 - **Shape for the method, hue for the method** — redundant on purpose, so the
   figure survives greyscale printing and a colorblind reader.
@@ -61,7 +65,7 @@ flatters the authors' method without anyone lying.
   rest from the legend.
 - **Shape for the method, shade for an ordinal knob** is a good pair when the
   sweep value is itself ordered: distinct markers separate the methods, a
-  single-hue light-to-dark ramp (`family()`) orders the settings within each.
+  single-hue light-to-dark ramp (`family()` in `figstyle.py`) orders the settings within each.
   Two channels for two variables reads cleanly. What does not work is three —
   shape, hue, *and* a colorbar for two variables.
 
@@ -77,9 +81,50 @@ flatters the authors' method without anyone lying.
 | One legend entry per hyperparameter value | Direct-label the few that matter |
 | Seeds collapsed to a mean before the frontier | Take the frontier over settings, and show seed spread within a setting |
 
-## Template
+## Template — one frontier
 
-`figs/pareto.py`, reading `figs/pareto.csv` (`method,setting,seed,kl,reward`):
+`figs/frontier.py`, reading `figs/pareto.csv` (`method,setting,seed,kl,reward`)
+and plotting one method's runs:
+
+```python
+"""Pareto frontier over a set of runs or models.
+
+Regenerate: uv run --with-editable "$(viz path)" python figs/frontier.py
+"""
+
+import csv
+
+import viz
+
+DATA = "figs/pareto.csv"
+METHOD = "Ours"  # one set of points; comparing two methods' frontiers needs the figstyle fallback
+TITLE = None  # paper: the caption carries the claim. Report or chat: the finding, as a sentence.
+
+
+def main():
+    viz.set_defaults(size="column")
+    points = {}
+    with open(DATA) as handle:
+        for row in csv.DictReader(handle):
+            if row["method"] == METHOD:
+                points[f"setting {row['setting']} seed {row['seed']}"] = (float(row["kl"]), float(row["reward"]))
+
+    # Every run is a dot; the frontier links the runs no other run beats. A guide, not an interpolation.
+    fig = viz.scatter(points, frontier="upper-left", labels=False,
+                      xlabel="KL divergence (lower is better)", ylabel="Reward (higher is better)", title=TITLE)
+    fig.save("figs/frontier.pdf")
+    fig.save("figs/frontier.png")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## Fallback — several methods' frontiers (matplotlib)
+
+Vendor `figstyle.py` and `figstats.py` into `figs/`, run it with
+`uv run --with matplotlib --with numpy python figs/pareto.py`, and take the
+method colors from `viz.PALETTE` hex values:
 
 ```python
 """Reward against KL divergence. Regenerate: python figs/pareto.py"""
