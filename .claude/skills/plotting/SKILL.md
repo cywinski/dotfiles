@@ -36,7 +36,7 @@ numpy, hence the `uv run` line above. To render a JSON spec instead of Python:
 import viz
 fig = viz.hbar({"Closed book": 59, "With search": 12},
                roles={"baseline": "Closed book", "intervention": "With search"},
-               title="With search, wrong answers fell from 59% to 12%")
+               title="Search substantially cut wrong answers")   # the headline; the chart shows the numbers
 fig.save("fig.png")   # 2x PNG for chat, web and slides; .pdf for papers; .svg portable; .html for pages
 ```
 
@@ -158,7 +158,7 @@ answers; copy the closest one.
 
 | The figure goes to | Title | Caption |
 | --- | --- | --- |
-| A report, chat answer, slide, post or artifact | **The finding**, as one plain sentence (*Write the title*) | None in or under the figure; context goes in the surrounding text |
+| A report, chat answer, slide, post or artifact | **The finding** as a headline, without the chart's numbers (*Write the title*) | None in or under the figure; context goes in the surrounding text |
 | A paper (`.tex`) | **None** (`title=None`); viz then warns "No title", which is expected here and the only warning to leave | The LaTeX caption carries the claim (*Write the caption*) |
 
 Panel titles inside `panels` are still used in a paper: `(a) Over training`,
@@ -169,14 +169,21 @@ Panel titles inside `panels` are still used in a paper: `(a) Over training`,
 Readers look at the title first and remember it better than the chart, so the
 title carries the finding and nothing else on the figure competes with it.
 
-- One finding, stated literally: what was compared and what happened, in about
-  10 plain words. If it needs a semicolon, make two figures.
+- A headline: the one finding, what was compared and what happened, in about
+  10 plain words ("The inoculation prompt substantially cut reward hacking"). A
+  descriptive figure with no single finding gets a concise caption of what it
+  shows instead. If it needs a semicolon, make two figures.
+- No values the chart already prints: the reader reads them off the bars and
+  labels. Say the direction and a plain size ("substantially", "slightly", "did
+  not change"), not "fell from 59% to 12%". Quote a number only when the chart
+  doesn't show it, such as a condition ("At a 5% false-positive rate").
 - Name what the eye sees first, the highlighted bar or the biggest gap. If the
   point is a small difference, change the chart (highlight it, drop other
   bars), not the words.
 - Say what was measured, not what it means: "rated the episode higher", not
   "felt better"; "chose to stop", not "wanted to stop".
-- Numbers, not adjectives: "fell from 41% to 28%", not "dropped sharply".
+- Plain size words, not hype: "substantially", not "dramatically",
+  "skyrocketed" or "collapsed".
 - No colon setups ("The fix: search"), mirrored phrasing, metaphors, wordplay
   or questions. No names coined inside the project. Field terms the readers use
   daily are fine.
@@ -188,8 +195,8 @@ If the measure needs a sentence to explain, show a simpler measure.
 
 Numbers as measured: viz prints each value with the digits it has and never
 rounds it. A computed value such as a mean over seeds can have more digits
-than it deserves (18.475%): choose its precision with `decimals=` and quote the
-printed number in the title. One name per condition, the same in every figure
+than it deserves (18.475%): choose its precision with `decimals=`. One name
+per condition, the same in every figure
 and in the text.
 
 Check: read the title alone. Someone outside the project should be able to
@@ -237,6 +244,14 @@ orange, blue, sage, purple and ochre for the interventions in that order, a
 light-to-dark blue ramp for ordered conditions (doses, sizes, steps), and light
 gray for everything else. A reference (chance, the base model) is a dashed
 `ref=` line, not a color.
+
+**Horizontal lines where they help comparison.** Vertical `bars`, `box`,
+`strip` and `violin` draw no gridlines by default: pass `grid=True` for light
+horizontal lines at each tick when readers compare heights across groups that
+sit apart, such as the same condition in several groups. A level that means
+something (chance, the base model, 50% for no preference, a target) is a dashed
+`ref=` line with `ref_label=`. `line`, `area` and `scatter` draw gridlines
+already; `hbar` and `dotplot` draw vertical ones.
 
 ```python
 viz.set_roles(control="Closed book", intervention="With search", second="Rerank", ordered=["1M", "3M", "10M"])
@@ -375,8 +390,10 @@ those eight, copy the closest template in `$(viz path)/examples/`.
 
 ## Before you hand it over
 
-- **Fix every viz check warning** that saving prints. The one exception is
-  "No title" on a paper figure. `viz check spec.json` checks specs without
+- **Fix every viz check warning** that saving prints, with two exceptions:
+  "No title" on a paper figure, and title warnings that conflict with *Write
+  the title* (viz asks to "give the numbers" and flags plain size words such as
+  "substantially"; keep the headline without numbers). `viz check spec.json` checks specs without
   rendering.
 - **Look at every PNG before you send it.** The checks cover titles, colors and
   order, not layout: tick labels that run into each other (thin them with
